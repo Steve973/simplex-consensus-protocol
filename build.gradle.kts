@@ -34,13 +34,14 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.asyncapi.core)
+    implementation(libs.bouncycastle.provider.fips)
     implementation(libs.google.guava)
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation(libs.junit.jupiter.engine)
 }
 
 tasks.test {
@@ -57,7 +58,10 @@ val itest by tasks.registering(Test::class) {
 
 spotless {
     java {
-        ratchetFrom("origin/main")
         eclipse().configFile("${rootDir}/project-resources/java-format/eclipse-java-style.xml")
     }
+}
+
+tasks.named("check") {
+    dependsOn("spotlessApply", "spotlessCheck")
 }

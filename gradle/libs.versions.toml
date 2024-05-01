@@ -1,10 +1,14 @@
 [versions]
+asyncApi = "1.0.0-RC"
+bouncycastleFips = "1.0.2.5"
 guava = "33.0.0-jre"
-spotlessPlugin = "6.25.0"
-lombok = "1.18.30"
 junit = "5.10.2"
+lombok = "1.18.30"
+spotlessPlugin = "6.25.0"
 
 [libraries]
+asyncapi-core = { module = "com.asyncapi:asyncapi-core", version.ref = "asyncApi" }
+bouncycastle-provider-fips = { module = "org.bouncycastle:bc-fips", version.ref = "bouncycastleFips" }
 google-guava = { module = "com.google.guava:guava", version.ref = "guava" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
