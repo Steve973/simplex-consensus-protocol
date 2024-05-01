@@ -12,6 +12,7 @@ import org.storck.simplex.model.SignedVote;
 import org.storck.simplex.model.Vote;
 import org.storck.simplex.model.VoteRegistryEntry;
 import org.storck.simplex.util.CryptoUtil;
+import org.storck.simplex.util.SimplexConstants;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -26,11 +27,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Function;
 
-import static org.storck.simplex.util.SimplexConsensusProtocolConstants.DUMMY_BLOCK_HASH;
-import static org.storck.simplex.util.SimplexConsensusProtocolConstants.electLeader;
-import static org.storck.simplex.util.SimplexConsensusProtocolConstants.genesisBlock;
+import static org.storck.simplex.util.SimplexConstants.DUMMY_BLOCK_HASH;
+import static org.storck.simplex.util.SimplexConstants.createNotarizedBlock;
+import static org.storck.simplex.util.SimplexConstants.electLeader;
+import static org.storck.simplex.util.SimplexConstants.finalizeIteration;
+import static org.storck.simplex.util.SimplexConstants.genesisBlock;
 
 public class SimplexConsensusProtocolService<T> {
 
@@ -47,6 +49,8 @@ public class SimplexConsensusProtocolService<T> {
     private final NotarizedBlockchain<T> notarizedBlockchain;
 
     private final ProposalValidator<T> proposalValidator;
+
+    private final VoteService<T> voteValidator;
 
     private final Timer iterationTimer;
 
@@ -69,10 +73,11 @@ public class SimplexConsensusProtocolService<T> {
         this.deltaSeconds = deltaSeconds;
         this.notarizedBlockchain = new NotarizedBlockchain<>(new ArrayList<>());
         this.currentIteration = 0;
+        this.voteRegistry = new HashMap<>();
         this.proposalValidator = new ProposalValidator<>(localPlayerId, keyPair, playerIdsToPublicKeys);
+        this.voteValidator = new VoteService<>(playerIdsToPublicKeys, voteRegistry);
         notarizedBlockchain.blocks().add(new NotarizedBlock<>(genesisBlock(), Set.of()));
         this.iterationTimer = new Timer();
-        this.voteRegistry = new HashMap<>();
     }
 
     void synchronizeIterationNumber(NotarizedBlockchain<T> notarizedBlockchain) {
@@ -94,7 +99,7 @@ public class SimplexConsensusProtocolService<T> {
             public void run() {
                 try {
                     Vote vote = new Vote(localPlayerId, currentIteration, DUMMY_BLOCK_HASH);
-                    byte[] voteBytes = CryptoUtil.voteToBytes(vote);
+                    byte[] voteBytes = SimplexConstants.voteToBytes(vote);
                     byte[] voteSignature = CryptoUtil.generateSignature(keyPair.getPrivate(), voteBytes);
                     SignedVote signedVote = new SignedVote(vote, voteSignature);
                     peerNetworkClient.broadcastVote(signedVote);
@@ -118,7 +123,7 @@ public class SimplexConsensusProtocolService<T> {
                     .orElseThrow(() -> new IllegalArgumentException("Could not get parent block hash for proposal"));
             Proposal<T> proposal = new Proposal<>(currentIteration, localPlayerId, new Block<>(currentBlockchainSize + 1, parentHash, new ArrayList<>(transactions)),
                     notarizedBlockchain);
-            byte[] proposalBytes = CryptoUtil.proposalToBytes(proposal);
+            byte[] proposalBytes = SimplexConstants.proposalToBytes(proposal);
             byte[] proposalSignature = CryptoUtil.generateSignature(keyPair.getPrivate(), proposalBytes);
             SignedProposal<T> signedProposal = new SignedProposal<>(proposal, proposalSignature);
             peerNetworkClient.broadcastProposal(signedProposal);
@@ -132,27 +137,17 @@ public class SimplexConsensusProtocolService<T> {
     }
 
     public void processVote(SignedVote signedVote) throws GeneralSecurityException, JsonProcessingException {
-        if (!validateVote(signedVote)) {
-            return;
-        }
-
-        Vote vote = signedVote.vote();
-        String proposalIdentifier = getProposalIdentifier.apply(vote);
-
-        // Keep track of the votes for this proposal
-        VoteRegistryEntry<T> voteRegistryEntry = voteRegistry.get(proposalIdentifier);
-        voteRegistryEntry.votes().add(vote);
-
-        // Check if a quorum has been reached for this proposal
-        if (hasQuorum(proposalIdentifier)) {
+        // Process vote and check if a quorum has been reached for this proposal
+        if (voteValidator.processVote(currentIteration, signedVote)) {
             // Create a notarized block with the proposal and the quorum votes
+            VoteRegistryEntry<T> voteRegistryEntry = voteRegistry.get(VoteService.getProposalIdentifier.apply(signedVote.vote()));
             NotarizedBlock<T> notarizedBlock = createNotarizedBlock(voteRegistryEntry.block(), voteRegistryEntry.votes());
 
             // Cancel the iteration timer (if running)
             iterationTimer.cancel();
 
             // Finalize the iteration
-            finalizeIteration(notarizedBlock);
+            finalizeIteration(notarizedBlock, notarizedBlockchain);
 
             // Output transactions to the client
             outputTransactions(notarizedBlock);
@@ -160,52 +155,6 @@ public class SimplexConsensusProtocolService<T> {
             // Reset the CountDownLatch to signal the end of the current iteration
             iterationCountdownLatch.countDown();
         }
-    }
-
-    private boolean validateVote(SignedVote signedVote) throws JsonProcessingException, GeneralSecurityException {
-        Vote vote = signedVote.vote();
-        String playerId = vote.playerId();
-        if (!playerIdsToPublicKeys.containsKey(playerId)) {
-            // Vote is from an unknown player
-            return false;
-        }
-
-        if (vote.iteration() != currentIteration) {
-            // Vote is for a different iteration
-            return false;
-        }
-
-        if (!voteRegistry.containsKey(getProposalIdentifier.apply(vote))) {
-            // Vote is for an unknown proposal
-            return false;
-        }
-
-        PublicKey playerPublicKey = playerIdsToPublicKeys.get(playerId);
-        byte[] input = CryptoUtil.voteToBytes(vote);
-        return CryptoUtil.verifySignature(playerPublicKey, input, signedVote.signature());
-    }
-
-    private static final Function<Vote, String> getProposalIdentifier = (vote) -> vote.iteration() + ":" + vote.blockHash();
-
-    private boolean hasQuorum(String proposalIdentifier) {
-        Set<Vote> votes = voteRegistry.get(proposalIdentifier).votes();
-        if (votes == null) {
-            return false;
-        }
-
-        int numPlayers = playerIdsToPublicKeys.size();
-        int quorumSize = (int) Math.ceil(numPlayers * 2 / 3.0);
-        return votes.size() >= quorumSize;
-    }
-
-    private NotarizedBlock<T> createNotarizedBlock(Block<T> block, Set<Vote> quorumVotes) {
-        // Create a NotarizedBlock object with the block and the quorum votes
-        return new NotarizedBlock<>(block, quorumVotes);
-    }
-
-    private void finalizeIteration(NotarizedBlock<T> notarizedBlock) {
-        // Add the notarized block to the blockchain
-        notarizedBlockchain.blocks().add(notarizedBlock);
     }
 
     private void outputTransactions(NotarizedBlock<T> notarizedBlock) {

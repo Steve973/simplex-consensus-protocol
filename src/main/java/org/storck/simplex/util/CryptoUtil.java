@@ -1,13 +1,9 @@
 package org.storck.simplex.util;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.experimental.UtilityClass;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.storck.simplex.model.Block;
-import org.storck.simplex.model.Proposal;
-import org.storck.simplex.model.Vote;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -20,6 +16,8 @@ import java.security.Signature;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.storck.simplex.util.SimplexConstants.JSON_MAPPER;
+
 @UtilityClass
 public class CryptoUtil {
 
@@ -30,8 +28,6 @@ public class CryptoUtil {
     private static final String SIGNATURE_ALGORITHM = "SHA384withECDSA";
 
     private static final BouncyCastleFipsProvider BOUNCY_CASTLE_FIPS_PROVIDER = new BouncyCastleFipsProvider();
-
-    private static final JsonMapper jsonMapper = new JsonMapper(new JsonFactory());
 
     public static String computeHash(byte[] input) {
         try {
@@ -47,7 +43,7 @@ public class CryptoUtil {
 
     public static <T> String computeHash(Block<T> block) {
         try {
-            byte[] input = jsonMapper.writeValueAsBytes(block);
+            byte[] input = JSON_MAPPER.writeValueAsBytes(block);
             return computeHash(input);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -72,13 +68,5 @@ public class CryptoUtil {
         signature.initVerify(ecPublic);
         signature.update(input);
         return signature.verify(encSignature);
-    }
-
-    public static <T> byte[] proposalToBytes(Proposal<T> proposal) throws JsonProcessingException {
-        return jsonMapper.writeValueAsBytes(proposal);
-    }
-
-    public static byte[] voteToBytes(Vote vote) throws JsonProcessingException {
-        return jsonMapper.writeValueAsBytes(vote);
     }
 }

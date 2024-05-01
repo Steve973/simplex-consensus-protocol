@@ -10,6 +10,7 @@ import org.storck.simplex.model.SignedVote;
 import org.storck.simplex.model.Vote;
 import org.storck.simplex.model.VoteRegistryEntry;
 import org.storck.simplex.util.CryptoUtil;
+import org.storck.simplex.util.SimplexConstants;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -46,7 +47,7 @@ public class ProposalValidator<T> {
         }
 
         PublicKey proposalPlayerPublicKey = playerIdsToPublicKeys.get(proposal.playerId());
-        byte[] proposalBytes = CryptoUtil.proposalToBytes(proposal);
+        byte[] proposalBytes = SimplexConstants.proposalToBytes(proposal);
         if (!CryptoUtil.verifySignature(proposalPlayerPublicKey, proposalBytes, signedProposal.signature())) {
             return false;
         }
@@ -86,7 +87,7 @@ public class ProposalValidator<T> {
         if (isValidProposal(signedProposal, proposalHash, notarizedBlockchain, processedProposalIds, playerIdsToPublicKeys)) {
             voteRegistry.put(currentIteration + ":" + proposalHash, new VoteRegistryEntry<>(newBlock, new HashSet<>()));
             Vote vote = new Vote(playerId, currentIteration, proposalHash);
-            byte[] voteBytes = CryptoUtil.voteToBytes(vote);
+            byte[] voteBytes = SimplexConstants.voteToBytes(vote);
             byte[] voteSignature = CryptoUtil.generateSignature(keyPair.getPrivate(), voteBytes);
             return new SignedVote(vote, voteSignature);
         }
