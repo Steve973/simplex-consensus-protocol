@@ -64,7 +64,8 @@ public class SimplexConsensusProtocolService<T> {
     private final Map<String, PublicKey> playerIdsToPublicKeys;
 
     /**
-     * Represents the time duration in seconds for network operations like sending messages and responding.
+     * Under good network conditions, every message is delivered within <delta> seconds.  This is that value, and it is
+     * provided by the peer network client.
      */
     private final int deltaSeconds;
 
