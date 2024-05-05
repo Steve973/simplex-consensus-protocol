@@ -8,10 +8,9 @@ dependencyResolutionManagement {
     repositories {
         mavenCentral()
     }
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
+    }
 }
-
-rootProject.name = "simplex-consensus-protocol"
-
-include("simplex-core")
-include("simplex-api")
-include("simplex-networking-specificimpl")

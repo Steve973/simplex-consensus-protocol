@@ -1,17 +1,34 @@
 [versions]
-asyncApi = "1.0.0-RC"
 bouncycastleFips = "1.0.2.5"
+dependencyLicenseReport = "2.7"
 guava = "33.0.0-jre"
-junit = "5.10.2"
+jackson = "2.17.0"
+kotest = "5.8.1"
+kotlin = "1.9.23"
+libp2p = "1.1.0-RELEASE"
 lombok = "1.18.30"
-spotlessPlugin = "6.25.0"
+spotless = "6.25.0"
 
 [libraries]
-asyncapi-core = { module = "com.asyncapi:asyncapi-core", version.ref = "asyncApi" }
 bouncycastle-provider-fips = { module = "org.bouncycastle:bc-fips", version.ref = "bouncycastleFips" }
+dependency-license-report-plugin = { module = "com.github.jk1.dependency-license-report:com.github.jk1.dependency-license-report.gradle.plugin", version.ref = "dependencyLicenseReport" }
 google-guava = { module = "com.google.guava:guava", version.ref = "guava" }
-junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
-junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
-junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+kotest-framework = { module = "io.kotest:kotest-framework-api-jvm", version.ref = "kotest" }
+kotest-assertions = { module = "io.kotest:kotest-assertions-core-jvm", version.ref = "kotest" }
+kotest-property = { module = "io.kotest:kotest-property-jvm", version.ref = "kotest" }
+kotest-junit5 = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
+kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+libp2p = { module = "io.libp2p:jvm-libp2p", version.ref = "libp2p" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
-spotless-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotlessPlugin" }
+spotless-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
+
+[bundles]
+kotest = ["kotest-junit5", "kotest-framework", "kotest-assertions", "kotest-property"]
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+licenseReport = { id = "com.github.jk1.dependency-license-report", version.ref = "dependencyLicenseReport" }
+spotless = { id = "com.diffplug.gradle.spotless", version.ref = "spotless" }
