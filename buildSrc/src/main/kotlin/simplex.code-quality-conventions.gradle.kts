@@ -1,4 +1,5 @@
 plugins {
+    checkstyle
     pmd
 }
 
@@ -9,4 +10,9 @@ pmd {
     ruleSets = listOf(
         "${rootProject.projectDir}/project-resources/pmd/pmd-ruleset.xml"
     )
+}
+
+checkstyle {
+    toolVersion = "10.15.0"
+    configFile = file("${rootProject.projectDir}/project-resources/checkstyle/checkstyle.xml")
 }

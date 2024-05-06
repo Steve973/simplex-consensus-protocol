@@ -4,6 +4,7 @@ plugins {
 
 spotless {
     java {
+        importOrder("", "javax.|java.", "\\#")
         eclipse().configFile("${rootDir}/project-resources/java-format/eclipse-java-style.xml")
     }
 }

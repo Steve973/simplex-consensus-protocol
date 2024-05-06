@@ -13,6 +13,14 @@ import java.util.Objects;
  */
 public record Proposal<T>(int iteration, String playerId, Block<T> newBlock, NotarizedBlockchain<T> parentChain) {
 
+    /**
+     * Requires non-null for various fields.
+     *
+     * @param iteration the iteration number
+     * @param playerId the ID of the player/peer
+     * @param newBlock the proposed block
+     * @param parentChain the current chain that the block is proposed to be added
+     */
     public Proposal {
         Objects.requireNonNull(playerId);
         Objects.requireNonNull(newBlock);

@@ -64,11 +64,10 @@ public class MessageUtils {
     /**
      * Converts an object of type T to a byte array.
      *
+     * @param <T> the type of object to convert
      * @param object the object to convert to bytes
      * 
      * @return a byte array representation of the given object
-     * 
-     * @param <T> the type of object to convert
      */
     public static <T> byte[] toBytes(final T object) {
         TypeReference<T> typeRef = new TypeReference<>() {

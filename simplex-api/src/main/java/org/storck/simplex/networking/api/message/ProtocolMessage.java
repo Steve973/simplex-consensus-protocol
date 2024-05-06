@@ -7,7 +7,7 @@ public interface ProtocolMessage {
 
     /**
      * Specifies the type of protocol message.
-     * 
+     *
      * @return the type of protocol message
      */
     ProtocolMessageType getType();

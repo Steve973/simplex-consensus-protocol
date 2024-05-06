@@ -12,7 +12,7 @@ import org.storck.simplex.networking.api.message.NetworkMessageType;
 public record NetworkEventMessage(NetworkEvent event, String details) implements NetworkMessage {
 
     /**
-     * Specifies that this is a network event message
+     * Specifies that this is a network event message.
      *
      * @return the value of {@link NetworkMessageType#NETWORK_EVENT}
      */

@@ -2,7 +2,7 @@ plugins {
     id("simplex.java-conventions")
     id("simplex.java-itest-conventions")
     id("simplex.javadoc-conventions")
-    id("simplex.pmd-conventions")
+    id("simplex.code-quality-conventions")
     id("simplex.spotless-conventions")
     id("simplex.kotlin-conventions")
 }
