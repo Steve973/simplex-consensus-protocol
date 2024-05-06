@@ -1,5 +1,6 @@
 package org.storck.simplex.service;
 
+import com.google.common.base.Charsets;
 import lombok.extern.slf4j.Slf4j;
 import org.storck.simplex.model.NotarizedBlockchain;
 import org.storck.simplex.model.PeerInfo;
@@ -111,7 +112,7 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
                     if (removedPlayerKey == null) {
                         log.warn("Tried to remove unknown peer with peerId: '{}'", peerInfo.peerId());
                     } else {
-                        log.info("Removed peer with peerId: '{}' and public key: '{}'", peerInfo.peerId(), new String(removedPlayerKey.getEncoded()));
+                        log.info("Removed peer with peerId: '{}' and public key: '{}'", peerInfo.peerId(), new String(removedPlayerKey.getEncoded(), Charsets.UTF_8));
                     }
                 }
                 case PEER_CONNECTED -> {

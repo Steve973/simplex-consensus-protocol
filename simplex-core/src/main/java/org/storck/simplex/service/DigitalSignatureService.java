@@ -3,6 +3,7 @@ package org.storck.simplex.service;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.storck.simplex.model.Block;
@@ -22,6 +23,7 @@ import java.util.stream.IntStream;
 /**
  * Handles digital signature operations.
  */
+@Getter
 public class DigitalSignatureService {
 
     /**
@@ -34,7 +36,6 @@ public class DigitalSignatureService {
      * The key pair used for cryptographic operations, including signing and
      * verifying proposals and votes.
      */
-    @Getter
     private final KeyPair keyPair;
 
     /** Algorithm used for message digest computation. */
@@ -58,6 +59,7 @@ public class DigitalSignatureService {
     /**
      * Create an instance. A keypair will be generated.
      */
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "If the keypair cannot be generated, this node cannot run anyway")
     public DigitalSignatureService() {
         this.keyPair = generateKeyPair();
     }

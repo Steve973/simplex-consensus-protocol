@@ -10,4 +10,8 @@ import java.util.List;
  * @param blocks the list of notarized blocks in the blockchain
  */
 public record NotarizedBlockchain<T>(List<NotarizedBlock<T>> blocks) {
+
+    public NotarizedBlockchain {
+        blocks = List.copyOf(blocks);
+    }
 }

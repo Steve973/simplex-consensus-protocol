@@ -11,4 +11,8 @@ import java.util.List;
  * @param blocks the blocks of transactions
  */
 public record Blockchain<T>(int height, List<Block<T>> blocks) {
+
+    public Blockchain {
+        blocks = List.copyOf(blocks);
+    }
 }

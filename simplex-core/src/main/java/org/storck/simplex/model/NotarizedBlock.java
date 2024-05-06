@@ -11,4 +11,8 @@ import java.util.List;
  * @param votes votes that have been received from players for this block
  */
 public record NotarizedBlock<T>(Block<T> block, List<Vote> votes) {
+
+    public NotarizedBlock {
+        votes = List.copyOf(votes);
+    }
 }

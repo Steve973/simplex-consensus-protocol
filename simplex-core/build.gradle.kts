@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.google.guava)
     implementation(libs.jackson.databind)
     implementation(libs.slf4j.api)
+    implementation(libs.spotbugs.annotations)
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)

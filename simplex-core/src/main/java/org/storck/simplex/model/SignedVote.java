@@ -11,8 +11,24 @@ import java.util.Objects;
  */
 public record SignedVote(Vote vote, byte[] signature) {
 
+    /**
+     * Create an instance with the vote and signature.
+     *
+     * @param vote the vote
+     * @param signature the signature
+     */
     public SignedVote {
         Objects.requireNonNull(vote);
         Objects.requireNonNull(signature);
+        signature = signature.clone();
+    }
+
+    /**
+     * Returns a copy of the signature.
+     *
+     * @return a copy of the signature
+     */
+    public byte[] signature() {
+        return signature.clone();
     }
 }

@@ -1,5 +1,7 @@
 package org.storck.simplex.service;
 
+import com.google.common.base.Charsets;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import org.storck.simplex.model.SignedVote;
 import org.storck.simplex.model.Vote;
@@ -77,6 +79,7 @@ public class IterationService {
      *     operations
      * @param peerNetworkClient the service that provides network interoperability
      */
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "The player service state is meant to change as players arrive and depart.")
     public IterationService(final String localPlayerId, final PlayerService playerService, final DigitalSignatureService digitalSignatureService,
             final PeerNetworkClient peerNetworkClient) {
         this.iterationNumber = 0;
@@ -109,8 +112,8 @@ public class IterationService {
      */
     String electLeader(final long iteration) {
         List<String> participantIds = playerService.getPlayerIds();
-        String hash = digitalSignatureService.computeBytesHash(Long.toString(iteration).getBytes());
-        BigInteger hashInt = new BigInteger(1, hash.getBytes());
+        String hash = digitalSignatureService.computeBytesHash(Long.toString(iteration).getBytes(Charsets.UTF_8));
+        BigInteger hashInt = new BigInteger(1, hash.getBytes(Charsets.UTF_8));
         return participantIds.get(hashInt.mod(BigInteger.valueOf(participantIds.size())).intValue());
     }
 
