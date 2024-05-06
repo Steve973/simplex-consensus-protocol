@@ -7,7 +7,9 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import java.security.KeyPair
 import java.security.PublicKey
 
-@SuppressFBWarnings(value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE"], justification = "I cannot find anything wrong with the test.")
+@SuppressFBWarnings(
+    value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE"],
+    justification = "I cannot find anything wrong with the test.")
 class DigitalSignatureServiceTest : FunSpec({
     test("testGenerateKeypair") {
         val result : KeyPair = DigitalSignatureService.generateKeyPair()!!
