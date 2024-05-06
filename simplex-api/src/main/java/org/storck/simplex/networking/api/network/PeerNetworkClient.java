@@ -14,16 +14,21 @@ public interface PeerNetworkClient {
     /**
      * Broadcasts a vote to all peers in the network.
      *
-     * @param vote
-     *            the vote to broadcast
+     * @param vote the vote to broadcast
      */
     void broadcastVote(VoteProtocolMessage vote);
 
     /**
      * Broadcasts a proposal to all peers in the network.
      *
-     * @param proposal
-     *            the proposal to broadcast
+     * @param proposal the proposal to broadcast
      */
     void broadcastProposal(ProposalProtocolMessage proposal);
+
+    /**
+     * Get the network delta seconds.
+     *
+     * @return the network delta seconds
+     */
+    int getNetworkDeltaSeconds();
 }

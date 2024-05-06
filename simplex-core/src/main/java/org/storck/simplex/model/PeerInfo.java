@@ -8,10 +8,8 @@ import java.util.Objects;
 /**
  * Details bean for a {@link NetworkEventMessage}.
  *
- * @param peerId
- *            the player peer ID
- * @param publicKey
- *            the player public key
+ * @param peerId the player peer ID
+ * @param publicKey the player public key
  */
 public record PeerInfo(String peerId, PublicKey publicKey) {
 
