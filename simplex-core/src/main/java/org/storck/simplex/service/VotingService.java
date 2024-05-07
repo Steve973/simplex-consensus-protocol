@@ -109,6 +109,7 @@ public class VotingService<T> {
      *
      * @param playerPublicKey the public key of the player
      * @param signedVote the signed vote to validate
+     * @param signatureService service responsible for digital signature operations
      *
      * @return true if the signature is valid, false otherwise
      */

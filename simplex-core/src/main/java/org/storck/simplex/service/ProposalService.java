@@ -167,6 +167,9 @@ public class ProposalService<T> {
     /**
      * If the local player is the leader, it retrieves pending transactions, creates
      * a proposal, and broadcasts it to peers.
+     *
+     * @param notarizedBlocks the list of notarized blocks in the current chain
+     * @param iterationNumber the iteration number for the new block proposal
      */
     void proposeNewBlock(final List<NotarizedBlock<T>> notarizedBlocks, final int iterationNumber) {
         Collection<T> transactions = new ArrayList<>();
