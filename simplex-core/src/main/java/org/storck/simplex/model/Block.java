@@ -10,6 +10,13 @@ import java.util.List;
  */
 public record Block<T>(int height, String parentHash, Collection<T> transactions) {
 
+    /**
+     * Create a Block.
+     *
+     * @param height the height of the block in the chain
+     * @param parentHash the hash of the parent block in the chain
+     * @param transactions the transactions for this block
+     */
     public Block {
         transactions = List.copyOf(transactions);
     }

@@ -189,6 +189,7 @@ public class ProposalService<T> {
      * Processes a proposal by validating it and broadcasting the resulting vote.
      *
      * @param signedProposal the proposal message to process
+     * @param notarizedBlocks the current known notarized blocks in the chain
      */
     public void processProposal(final SignedProposal<T> signedProposal, final List<NotarizedBlock<T>> notarizedBlocks) {
         Proposal<T> proposal = signedProposal.proposal();

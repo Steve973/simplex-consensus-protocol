@@ -12,6 +12,12 @@ import java.util.List;
  */
 public record Blockchain<T>(int height, List<Block<T>> blocks) {
 
+    /**
+     * Create a blockchain of height "h".
+     *
+     * @param height the height, or length of the chain
+     * @param blocks the blocks that constitute the blockchain
+     */
     public Blockchain {
         blocks = List.copyOf(blocks);
     }

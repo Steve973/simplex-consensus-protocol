@@ -13,6 +13,12 @@ import java.util.Objects;
  */
 public record PeerInfo(String peerId, PublicKey publicKey) {
 
+    /**
+     * Create the peer info.
+     *
+     * @param peerId the id of the peer
+     * @param publicKey the public key of the peer
+     */
     public PeerInfo {
         Objects.requireNonNull(peerId);
     }

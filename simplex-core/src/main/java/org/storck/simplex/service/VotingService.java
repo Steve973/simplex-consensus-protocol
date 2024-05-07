@@ -127,6 +127,7 @@ public class VotingService<T> {
      * @param proposalId the id of the proposal for this iteration
      * @param signedVote the signed vote to validate
      * @param playerService service that manages players and their public keys
+     * @param signatureService service responsible for digital signature operations
      *
      * @return true if the vote is valid, false otherwise
      */
@@ -167,6 +168,8 @@ public class VotingService<T> {
     /**
      * Create a vote for the proposal of this iteration.
      *
+     * @param localPlayerId the player ID of this (local) node
+     * 
      * @return a signed vote for the proposal
      */
     public SignedVote createProposalVote(final String localPlayerId) {

@@ -13,6 +13,13 @@ import java.util.Objects;
  */
 public record Vote(String playerId, int iteration, String blockHash) {
 
+    /**
+     * Create a vote.
+     *
+     * @param playerId the ID of the player casting the vote
+     * @param iteration the protocol iteration
+     * @param blockHash the hash/ID of the block that this vote is for
+     */
     public Vote {
         Objects.requireNonNull(playerId);
         Objects.requireNonNull(blockHash);

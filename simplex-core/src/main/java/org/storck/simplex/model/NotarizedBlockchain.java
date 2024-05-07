@@ -11,6 +11,11 @@ import java.util.List;
  */
 public record NotarizedBlockchain<T>(List<NotarizedBlock<T>> blocks) {
 
+    /**
+     * Create the notarized blockchain.
+     *
+     * @param blocks the blocks that constitute the chain
+     */
     public NotarizedBlockchain {
         blocks = List.copyOf(blocks);
     }
