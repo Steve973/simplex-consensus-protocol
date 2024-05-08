@@ -17,7 +17,7 @@ jobs:
       - name: Run Codacy Analysis CLI
         uses: codacy/codacy-analysis-cli-action@master
         with:
-          project-token: ${{ secrets.CODACY_PAT }}
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           output: results.sarif
           format: sarif
           # Adjust severity of non-security issues
@@ -31,3 +31,4 @@ jobs:
         uses: github/codeql-action/upload-sarif@main
         with:
           sarif_file: results.sarif
+          token: ${{ secrets.CODACY_PAT }}
