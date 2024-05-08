@@ -1,4 +1,7 @@
 # Simplex Consensus Protocol: Java Implementation
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8ddf45f0517b40d0ba3c17726a812afc)](https://app.codacy.com/gh/Steve973/simplex-consensus-protocol?utm_source=github.com&utm_medium=referral&utm_content=Steve973/simplex-consensus-protocol&utm_campaign=Badge_Grade)
+
 This project attempts to create a Java implementation of the Simplex Consensus Protocol.  For maximum flexibility and
 usability, the library has been implemented in a layered approach.
 
