@@ -163,7 +163,7 @@ Each player `i`, on entering iteration `h` does the following:
    notarized blockchain of length `h`, they can finalize all the transactions contained within (and output them to the
    client).
 
-# License Information
+## License Information
 
 This project is available under the MIT license. Full text of the license can be found in the
 [license](LICENSE) file.
