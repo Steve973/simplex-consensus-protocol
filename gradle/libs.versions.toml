@@ -7,6 +7,7 @@ kotest = "5.8.1"
 kotlin = "1.9.23"
 libp2p = "1.1.0-RELEASE"
 lombok = "1.18.30"
+netty = "4.1.109.Final"
 slf4j = "2.0.13"
 spotbugs = "6.0.14"
 spotbugsAnnotations = "4.8.5"
@@ -24,8 +25,9 @@ kotest-property = { module = "io.kotest:kotest-property-jvm", version.ref = "kot
 kotest-junit5 = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
 kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
-libp2p = { module = "io.libp2p:jvm-libp2p", version.ref = "libp2p" }
+libp2p-jvm = { module = "io.libp2p:jvm-libp2p", version.ref = "libp2p" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+netty-all = { module = "io.netty:netty-all", version.ref = "netty" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", version.ref = "spotbugsAnnotations" }
 spotbugs-plugin = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version.ref = "spotbugs" }
