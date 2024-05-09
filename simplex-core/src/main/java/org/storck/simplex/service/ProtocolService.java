@@ -56,17 +56,12 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
     private final VotingService<T> votingService;
 
     /**
-     * Handles digital signature operations.
-     */
-    private final DigitalSignatureService signatureService;
-
-    /**
      * Handles communication/messaging between peers.
      */
     private final PeerNetworkClient peerNetworkClient;
 
     /**
-     * Service to manage the blockchian.
+     * Service to manage the blockchain.
      */
     private final BlockchainService<T> blockchainService;
 
@@ -87,7 +82,7 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
         this.localPlayerId = UUID.randomUUID().toString();
         this.iterationNumber = 0;
         this.playerService = new PlayerService();
-        this.signatureService = new DigitalSignatureService();
+        DigitalSignatureService signatureService = new DigitalSignatureService();
         this.proposalService = new ProposalService<>(localPlayerId, signatureService, peerNetworkClient);
         this.votingService = new VotingService<>(signatureService, playerService);
         this.blockchainService = new BlockchainService<>();
