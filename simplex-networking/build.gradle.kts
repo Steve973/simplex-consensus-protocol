@@ -7,12 +7,6 @@ plugins {
     id("simplex.kotlin-conventions")
 }
 
-configurations {
-    compileOnly {
-        extendsFrom(configurations.annotationProcessor.get())
-    }
-}
-
 dependencies {
     implementation(project(":simplex-api"))
 
@@ -21,16 +15,6 @@ dependencies {
     implementation(libs.jackson.databind)
     implementation(libs.netty.all)
     implementation(libs.slf4j.api)
-    implementation(libs.spotbugs.annotations)
-
-    compileOnly(libs.lombok)
-    annotationProcessor(libs.lombok)
-
-    testImplementation(libs.bundles.kotest)
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
 
 repositories {
