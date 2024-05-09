@@ -17,8 +17,12 @@ checkstyle {
 
 pitest {
     junit5PluginVersion.set("1.2.0")
+    threads.set(4)
     targetClasses.set(listOf("org.storck.simplex.*"))
     outputFormats.set(listOf("XML", "HTML"))
+    mutationThreshold.set(0)
+    exportLineCoverage.set(false)
+    verbose.set(false)
 }
 
 pmd {
@@ -51,4 +55,8 @@ tasks.named<SpotBugsTask>("spotbugsTest") {
         outputLocation = layout.buildDirectory.file("reports/spotbugs/spotbugs-test.html")
         setStylesheet("fancy-hist.xsl")
     }
+}
+
+tasks.named("test") {
+    finalizedBy("pitest")
 }
