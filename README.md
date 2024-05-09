@@ -7,26 +7,25 @@ usability, the library has been implemented in a layered approach.
 
 ## Layered Approach
 
- - *Core library layer*:
+- *Core library layer*:
 
    The core layer is the implementation of the base protocol, itself.  While the protocol relies on features including
    network connectivity, key exchange, message broadcast, etc., those features are not included in this level.  This is
    deliberate, so that users or teams that have their own peer-to-peer network already present and configured can still
    use the core library with their own network implementation and configuration.
 
- - *Peer-to-peer network layer*:
+- *Peer-to-peer network layer*:
 
    The p2p network layer utilizes the Java implementation of libp2p, along with WebRTC, to handle the setup of the
    peer-to-peer networking, including public key exchange, the actual transport concerns of the messages between peers,
    and anything that facilitates the protocol, but is not a direct concern of the Simplex Consensus protocol, itself.
 
- - *Client interaction layer*:
+- *Client interaction layer*:
 
    Since clients of the Simplex Consensus protocol need to submit their transactions to the other peers, and since they
    need to receive notifications of other peers' transactions, this layer allows the clients to exchange information
    and utilize the protocol without having any specific knowledge of the protocol operation.  The protocol remains a
    "black box" to the clients.  This layer is implemented with Spring Boot and provides REST endpoints.
- 
 
 ## Simplex Consensus Protocol Description
 
