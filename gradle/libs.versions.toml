@@ -8,6 +8,7 @@ kotlin = "1.9.23"
 libp2p = "1.1.0-RELEASE"
 lombok = "1.18.30"
 netty = "4.1.109.Final"
+pitest = "1.15.0"
 slf4j = "2.0.13"
 spotbugs = "6.0.14"
 spotbugsAnnotations = "4.8.5"
@@ -28,6 +29,7 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "
 libp2p-jvm = { module = "io.libp2p:jvm-libp2p", version.ref = "libp2p" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 netty-all = { module = "io.netty:netty-all", version.ref = "netty" }
+pitest-plugin = { module = "info.solidsoft.gradle.pitest:gradle-pitest-plugin", version.ref = "pitest" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", version.ref = "spotbugsAnnotations" }
 spotbugs-plugin = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version.ref = "spotbugs" }
@@ -39,5 +41,6 @@ kotest = ["kotest-junit5", "kotest-framework", "kotest-assertions", "kotest-prop
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 licenseReport = { id = "com.github.jk1.dependency-license-report", version.ref = "dependencyLicenseReport" }
+pitest = { id = "info.solidsoft.pitest", version.ref = "pitest" }
 spotbugs = { id = "com.github.spotbugs", version.ref = "spotbugs" }
 spotless = { id = "com.diffplug.gradle.spotless", version.ref = "spotless" }

@@ -1,16 +1,24 @@
 import com.github.spotbugs.snom.Confidence
 import com.github.spotbugs.snom.Effort
 import com.github.spotbugs.snom.SpotBugsTask
+import gradle.kotlin.dsl.accessors._984b42742b1efd04b12d9b66321c4910.pitest
 
 plugins {
     checkstyle
     pmd
     id("com.github.spotbugs")
+    id("info.solidsoft.pitest")
 }
 
 checkstyle {
     toolVersion = "10.15.0"
     configFile = file("${rootProject.projectDir}/project-resources/checkstyle/checkstyle.xml")
+}
+
+pitest {
+    junit5PluginVersion.set("1.2.0")
+    targetClasses.set(listOf("org.storck.simplex.*"))
+    outputFormats.set(listOf("XML", "HTML"))
 }
 
 pmd {
