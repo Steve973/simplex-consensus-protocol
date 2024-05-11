@@ -1,36 +1,36 @@
 # Simplex Consensus Protocol: Java Implementation
 
-[![License](https://badgen.net/github/license/Steve973/simplex-consensus-protocol?cache=300)](https://github.com/Steve973/simplex-consensus-protocol/blob/main/LICENSE)
+[![License](https://badgen.net/github/license/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/blob/main/LICENSE)
 
 Quality and Security Metrics
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4b9194bffb2c42f9902b05c1e8961dd1)](https://app.codacy.com/gh/Steve973/simplex-consensus-protocol/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-[![Dependabot Status](https://badgen.net/github/dependabot/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/dependabot)
+[![Dependabot Status](https://badgen.net/github/dependabot/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/dependabot)
 
 Activity
 
-[![Latest Release](https://badgen.net/github/release/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/releases)
-[![Commits Count](https://badgen.net/github/commits/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/commits)
-[![Latest Commit](https://badgen.net/github/last-commit/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/commits)
-[![Releases](https://badgen.net/github/releases/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/releases)
-[![Tags](https://badgen.net/github/tags/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/tags)
-[![Latest Tag](https://badgen.net/github/tag/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/tags)
-[![Branches](https://badgen.net/github/branches/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/branches)
+[![Latest Release](https://badgen.net/github/release/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/releases)
+[![Commits Count](https://badgen.net/github/commits/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/commits)
+[![Latest Commit](https://badgen.net/github/last-commit/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/commits)
+[![Releases](https://badgen.net/github/releases/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/releases)
+[![Tags](https://badgen.net/github/tags/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/tags)
+[![Latest Tag](https://badgen.net/github/tag/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/tags)
+[![Branches](https://badgen.net/github/branches/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/branches)
 
 Issues and PRs
 
-[![Open Issues](https://badgen.net/github/open-issues/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/issues)
-[![Closed Issues](https://badgen.net/github/closed-issues/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/issues)
-[![Open PRs](https://badgen.net/github/open-prs/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/pulls)
-[![Closed PRs](https://badgen.net/github/closed-prs/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/pulls)
-[![Merged PRs](https://badgen.net/github/merged-prs/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/pulls)
+[![Open Issues](https://badgen.net/github/open-issues/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/issues)
+[![Closed Issues](https://badgen.net/github/closed-issues/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/issues)
+[![Open PRs](https://badgen.net/github/open-prs/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/pulls)
+[![Closed PRs](https://badgen.net/github/closed-prs/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/pulls)
+[![Merged PRs](https://badgen.net/github/merged-prs/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/pulls)
 
 Interest
 
-[![Forks Count](https://badgen.net/github/forks/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/forks)
-[![Watchers](https://badgen.net/github/watchers/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/watchers)
-[![Stars Count](https://badgen.net/github/stars/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/stargazers)
-[![Contributors Count](https://badgen.net/github/contributors/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/contributors)
+[![Forks Count](https://badgen.net/github/forks/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/forks)
+[![Watchers](https://badgen.net/github/watchers/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/watchers)
+[![Stars Count](https://badgen.net/github/stars/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/stargazers)
+[![Contributors Count](https://badgen.net/github/contributors/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/contributors)
 
 This project attempts to create a Java implementation of the Simplex Consensus Protocol.  For maximum flexibility and
 usability, the library has been implemented in a layered approach.
