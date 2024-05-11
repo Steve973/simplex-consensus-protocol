@@ -29,6 +29,14 @@ usability, the library has been implemented in a layered approach.
 
 ## Simplex Consensus Protocol Description
 
+Much of the following information was borrowed, verbatim, from the (Simplex Blog)[https://simplex.blog] website,
+formatted for Markdown for convenient display in this readme file.  Please verify all of this information by
+cross-checking it with the aforementioned website, in case any changes have been made that this readme file does not
+reflect, or in the event that any of this information has been transposed incorrectly.  All credit for this information
+goes to Benjamin Chan @ Cornell, and anyone who worked with him.  The author(s) of this repository have not contributed
+to the protocol specification.  The following text represents, as accurately as possible, the content of the Simplex
+Blog's protocol description:
+
 We start with some preliminaries and data structures that will set the stage for the main body of the protocol.
 
 ### Digital Signatures
@@ -161,6 +169,57 @@ Each player `i`, on entering iteration `h` does the following:
    player `j`  player `i` deems that iteration to be finalized. If an iteration `h` is finalized, whenever player `i` sees a
    notarized blockchain of length `h`, they can finalize all the transactions contained within (and output them to the
    client).
+
+## Q & A
+
+The protocol description on the (Simplex Blog)[https://simplex.blog] website is thorough, clear, and concise.  Regardless,
+everyone comes from different backgrounds and different levels of experience, so questions are bound to arise.  Ben Chan
+graciously answered a number of questions.
+
+- **Question 1:** If a player votes for the dummy block, do the other players do anything with that block, or is it simply
+  a throw-away?
+
+  > If the (non-dummy) block gets notarized, it still might be integrated into the chain by a future leader, or even
+  > finalized. If it does not, then it is just thrown away.
+
+- **Question 2:** I feel like something should be done with it, or the protocol description would probably instruct that
+  the player simply let the iteration time out when not voting for the proposed block.
+
+  > The dummy block is basically what we do when the iteration times out.
+
+- **Question 3:** If a player experiences some sort of network outage, how do they get caught up with the blockchain?
+
+  > When other players move to the next iteration, they send to everyone their view of the notarized blockchain so far;
+  > this catches up any laggy nodes. (The bandwidth can be optimized in practice, i.e. see Victor Shoup's paper)
+
+- **Question 4:** Can a new player participate some amount of time after the protocol has started, and the current players
+  have been proposing/voting/etc for a number of iterations?  Or are all players pretty much set at the start with no
+  late-comers allowed?
+
+  > Latecomers are allowed, by the same reasoning as the network outage
+
+- **Question 5:** Is the proposed block a *required* part of the vote, or can a definitive identifier be used to save
+  space and bandwidth, like a hash?
+
+  > We could vote on a hash, at the risk that the actual block never shows up and the data is lost. Most protocols will
+  > only vote once they know the data is persisted on a majority of the network
+
+- **Question 6:** If the iteration leader does not have a block of transactions to propose, what should it do?  Does the
+  iteration simply time out?
+
+  > Up to the leader, it can propose an empty block, or timeout.
+
+- **Question 7:** I have still been searching around for information about how to synchronize either players who have
+  fallen out of sync, or to allow latecomers to join and catch up.  I still have not found anything conclusive, but I have
+  an idea as long as it doesn't violate the protocol itself.  My solution would be that an out of sync player or a
+  latecomer would broadcast a block, and we can call it a "hello" block or a "sync" block.
+
+  > In Simplex, it's handled in Step 4: "*Next iteration and finalize votes: On seeing a notarized blockchain of height h,
+  > enter iteration h+1. At the same time, p multicasts its view of the notarized blockchain to everyone else. At this
+  > point in time, if the timer `Th` did not fire yet: cancel `Th` (so it never fires) and multicast <finalize, h>*". The
+  > second line, where "*p multicasts its view of the notarized blockchain to everyone else*", should synchronize the rest
+  > of the network. In practice, it is likely better to implement this as a "pull" rather than a "push".
+
 
 ## License Information
 
