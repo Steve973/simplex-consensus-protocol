@@ -1,6 +1,8 @@
 # Simplex Consensus Protocol: Java Implementation
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4b9194bffb2c42f9902b05c1e8961dd1)](https://app.codacy.com/gh/Steve973/simplex-consensus-protocol/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Open Issues](https://badgen.net/github/open-issues/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/issues)
+[![License](https://badgen.net/github/license/Steve973/simplex-consensus-protocol)](https://github.com/Steve973/simplex-consensus-protocol/blob/main/LICENSE)
 
 This project attempts to create a Java implementation of the Simplex Consensus Protocol.  For maximum flexibility and
 usability, the library has been implemented in a layered approach.
@@ -29,13 +31,15 @@ usability, the library has been implemented in a layered approach.
 
 ## Simplex Consensus Protocol Description
 
-Much of the following information was borrowed, verbatim, from the (Simplex Blog)[https://simplex.blog] website,
-formatted for Markdown for convenient display in this readme file.  Please verify all of this information by
-cross-checking it with the aforementioned website, in case any changes have been made that this readme file does not
-reflect, or in the event that any of this information has been transposed incorrectly.  All credit for this information
-goes to Benjamin Chan @ Cornell, and anyone who worked with him.  The author(s) of this repository have not contributed
-to the protocol specification.  The following text represents, as accurately as possible, the content of the Simplex
-Blog's protocol description:
+Much of the following information was borrowed, verbatim, from the [Simplex Blog][1] website, which has been formatted
+for Markdown for convenient display in this readme file.  Please verify all of this information by cross-checking it
+with the aforementioned website, in case any changes have been made that this readme file does not reflect, or in the
+event that any of this information has been transposed incorrectly.  All credit for this information goes to Benjamin
+Chan at Cornell University, and anyone who worked with him.  The author(s) of this repository have not contributed
+to the protocol specification.  Their intent is to create a high-quality Java implementation that fulfills this protocol
+specification, and to share it with the community for use, or for further collaborative development.
+
+The following text represents, as accurately as possible, the content of the [Simplex Blog][1]'s protocol description:
 
 We start with some preliminaries and data structures that will set the stage for the main body of the protocol.
 
@@ -170,11 +174,16 @@ Each player `i`, on entering iteration `h` does the following:
    notarized blockchain of length `h`, they can finalize all the transactions contained within (and output them to the
    client).
 
+## Protocol full reference
+
+Please see the [full paper][3] that describes this protocol in much more detail.  For a presentation-friendly version of
+this description that provides some excellent diagrams that visualize some of these concepts, see the slides [PDF][2].
+
 ## Q & A
 
-The protocol description on the (Simplex Blog)[https://simplex.blog] website is thorough, clear, and concise.  Regardless,
-everyone comes from different backgrounds and different levels of experience, so questions are bound to arise.  Ben Chan
-graciously answered a number of questions.
+The protocol description on the [Simplex Blog][1] is thorough, clear, and concise.  Regardless, everyone comes from
+different backgrounds and different levels of experience, so questions are bound to arise.  Ben Chan graciously answered
+a number of questions.
 
 - **Question 1:** If a player votes for the dummy block, do the other players do anything with that block, or is it simply
   a throw-away?
@@ -220,8 +229,8 @@ graciously answered a number of questions.
   > second line, where "*p multicasts its view of the notarized blockchain to everyone else*", should synchronize the rest
   > of the network. In practice, it is likely better to implement this as a "pull" rather than a "push".
 
+## References
 
-## License Information
-
-This project is available under the MIT license. Full text of the license can be found in the
-[license](LICENSE) file.
+[1]: https://simplex.blog/ "Simplex Consensus: Fast and Simple Consensus"
+[2]: https://simplex.blog/slides-cornell23.pdf "Simplex Consensus Slides"
+[3]: https://eprint.iacr.org/2023/463.pdf "Simplex Consensus: A Simple and Fast Consensus Protocol by Benjamin Y Chan, Cornell University"
