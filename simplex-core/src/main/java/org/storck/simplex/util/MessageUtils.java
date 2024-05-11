@@ -9,6 +9,8 @@ import org.storck.simplex.model.PeerInfo;
 import org.storck.simplex.networking.api.network.NetworkEventMessage;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.Optional;
 
 /**
  * Utility class that provides methods to convert messages between formats.
@@ -42,22 +44,20 @@ public class MessageUtils {
      * Method to convert to the specified type from a byte array.
      *
      * @param bytes the byte array to be converted
+     * @param typeRef the type reference of the destination type
      * @param <T> the type of the object to be converted to
      *
      * @return an object of type T converted from the byte array
      */
-    public static <T> T fromBytes(final byte[] bytes) {
-        TypeReference<T> typeRef = new TypeReference<>() {
-
-            @Override
-            public String toString() {
-                return getType().getTypeName();
-            }
-        };
+    public static <T> T fromBytes(final byte[] bytes, final TypeReference<T> typeRef) {
         try {
             return JSON_MAPPER.readValue(bytes, typeRef);
         } catch (IOException e) {
-            throw new IllegalStateException("Unexpected error when converting from a byte array to [" + typeRef + "]", e);
+            String typeName = Optional.ofNullable(typeRef)
+                    .map(TypeReference::getType)
+                    .map(Type::getTypeName)
+                    .orElse("Unknown");
+            throw new IllegalStateException("Unexpected error when converting from a byte array to '" + typeName + "'", e);
         }
     }
 
@@ -70,17 +70,10 @@ public class MessageUtils {
      * @return a byte array representation of the given object
      */
     public static <T> byte[] toBytes(final T object) {
-        TypeReference<T> typeRef = new TypeReference<>() {
-
-            @Override
-            public String toString() {
-                return getType().getTypeName();
-            }
-        };
         try {
             return JSON_MAPPER.writeValueAsBytes(object);
         } catch (IOException e) {
-            throw new IllegalStateException("Unexpected error when converting object [" + typeRef + "] to byte array", e);
+            throw new IllegalStateException("Unexpected error when converting object to byte array", e);
         }
     }
 }

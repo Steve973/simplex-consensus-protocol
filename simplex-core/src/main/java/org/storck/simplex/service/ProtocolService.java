@@ -1,5 +1,6 @@
 package org.storck.simplex.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Charsets;
 import lombok.extern.slf4j.Slf4j;
 import org.storck.simplex.model.NotarizedBlockchain;
@@ -112,7 +113,9 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
                 }
                 case PEER_CONNECTED -> {
                     PeerInfo peerInfo = MessageUtils.peerInfoFromJson(eventMessage.details());
-                    playerService.addPlayer(peerInfo.peerId(), peerInfo.publicKey());
+                    byte[] publicKeyBytes = peerInfo.publicKeyBytes();
+                    PublicKey publicKey = DigitalSignatureService.publicKeyFromBytes(publicKeyBytes);
+                    playerService.addPlayer(peerInfo.peerId(), publicKey);
                 }
                 default -> log.warn("Received unknown network message type: '{}'", message.getMessageType());
             }
@@ -131,7 +134,8 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
         switch (messageType) {
             case VOTE_MESSAGE -> {
                 VoteProtocolMessage voteMessage = (VoteProtocolMessage) message;
-                SignedVote signedVote = MessageUtils.fromBytes(voteMessage.content());
+                SignedVote signedVote = MessageUtils.fromBytes(voteMessage.content(), new TypeReference<>() {
+                });
                 if (votingService.processVote(signedVote)) {
                     // TODO: Quorum was reached, so handle this somehow
                     iterationService.stopIteration();
@@ -143,7 +147,8 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
             }
             case PROPOSAL_MESSAGE -> {
                 ProposalProtocolMessage proposalMessage = (ProposalProtocolMessage) message;
-                SignedProposal<T> signedProposal = MessageUtils.fromBytes(proposalMessage.content());
+                SignedProposal<T> signedProposal = MessageUtils.fromBytes(proposalMessage.content(), new TypeReference<>() {
+                });
                 synchronizeIterationNumber(signedProposal.proposal().parentChain());
                 proposalService.processProposal(signedProposal, blockchainService.getBlockchain());
                 votingService.initializeForIteration(iterationNumber, signedProposal.proposal());

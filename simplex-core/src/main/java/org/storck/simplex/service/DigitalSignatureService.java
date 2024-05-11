@@ -10,6 +10,7 @@ import org.storck.simplex.model.Block;
 
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
@@ -17,6 +18,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -120,6 +123,27 @@ public class DigitalSignatureService {
             return keyPairGenerator.generateKeyPair();
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("Could not generate a key pair for cryptological operations", e);
+        }
+    }
+
+    /**
+     * Converts the given byte array representation of a public key into a PublicKey
+     * instance.
+     *
+     * @param keyBytes the byte array representation of the public key
+     * 
+     * @return the PublicKey instance
+     * 
+     * @throws IllegalStateException if the encoded public key cannot be converted
+     *     to a public key instance
+     */
+    public static PublicKey publicKeyFromBytes(final byte[] keyBytes) {
+        try {
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance(KEYPAIR_GENERATOR_ALGORITHM, BOUNCY_CASTLE_FIPS_PROVIDER);
+            return keyFactory.generatePublic(spec);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new IllegalStateException("Could not convert encoded public key to a public key instance", e);
         }
     }
 

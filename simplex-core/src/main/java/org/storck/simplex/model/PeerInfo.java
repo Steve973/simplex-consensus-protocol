@@ -1,25 +1,33 @@
 package org.storck.simplex.model;
 
-import org.storck.simplex.networking.api.network.NetworkEventMessage;
-
-import java.security.PublicKey;
 import java.util.Objects;
 
 /**
- * Details bean for a {@link NetworkEventMessage}.
+ * Peer information for messages.
  *
  * @param peerId the player peer ID
- * @param publicKey the player public key
+ * @param publicKeyBytes the player public key encoded in bytes
  */
-public record PeerInfo(String peerId, PublicKey publicKey) {
+public record PeerInfo(String peerId, byte[] publicKeyBytes) {
 
     /**
      * Create the peer info.
      *
      * @param peerId the id of the peer
-     * @param publicKey the public key of the peer
+     * @param publicKeyBytes the public key of the peer encoded in bytes
      */
     public PeerInfo {
         Objects.requireNonNull(peerId);
+        Objects.requireNonNull(publicKeyBytes);
+        publicKeyBytes = publicKeyBytes.clone();
+    }
+
+    /**
+     * Return a copy of the encoded public key.
+     *
+     * @return a copy of the encoded public key
+     */
+    public byte[] publicKeyBytes() {
+        return publicKeyBytes.clone();
     }
 }
