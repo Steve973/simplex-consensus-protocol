@@ -7,6 +7,7 @@ kotest = "5.9.0"
 kotlin = "1.9.24"
 libp2p = "1.1.0-RELEASE"
 lombok = "1.18.32"
+mockk = "1.13.10"
 netty = "4.1.109.Final"
 pitest = "1.15.0"
 slf4j = "2.0.13"
@@ -29,15 +30,17 @@ kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 libp2p-jvm = { module = "io.libp2p:jvm-libp2p", version.ref = "libp2p" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 netty-all = { module = "io.netty:netty-all", version.ref = "netty" }
 pitest-plugin = { module = "info.solidsoft.gradle.pitest:gradle-pitest-plugin", version.ref = "pitest" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", version.ref = "spotbugsAnnotations" }
 spotbugs-plugin = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version.ref = "spotbugs" }
 spotless-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 
 [bundles]
-kotest = ["kotest-junit5", "kotest-framework", "kotest-assertions", "kotest-property"]
+kotest = ["kotest-junit5", "kotest-framework", "kotest-assertions", "kotest-property", "mockk"]
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
