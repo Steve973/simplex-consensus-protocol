@@ -24,6 +24,7 @@ val libs = the<LibrariesForLibs>()
 dependencies {
     implementation(libs.slf4j.api)
     testImplementation(libs.slf4j.api)
+    testImplementation(libs.slf4j.simple)
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
     testCompileOnly(libs.lombok)

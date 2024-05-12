@@ -49,7 +49,7 @@ public class ProposalService<T> {
     /**
      * A set of all proposal IDs that have been seen and/or processed.
      */
-    private final Set<String> processedProposalIds;
+    final Set<String> processedProposalIds;
 
     /**
      * Creates the proposal service instance.
@@ -193,12 +193,18 @@ public class ProposalService<T> {
      *
      * @param signedProposal the proposal message to process
      * @param notarizedBlocks the current known notarized blocks in the chain
+     *
+     * @return true if the proposal is valid, or false if the checks for validity
+     *     fail
      */
-    public void processProposal(final SignedProposal<T> signedProposal, final List<NotarizedBlock<T>> notarizedBlocks) {
+    public boolean processProposal(final SignedProposal<T> signedProposal, final List<NotarizedBlock<T>> notarizedBlocks) {
         Proposal<T> proposal = signedProposal.proposal();
         String proposalId = signatureService.computeBlockHash(proposal.newBlock());
+        boolean valid = false;
         if (!processedProposalIds.contains(proposalId) && isValidProposal(signedProposal, notarizedBlocks)) {
             processedProposalIds.add(proposalId);
+            valid = true;
         }
+        return valid;
     }
 }

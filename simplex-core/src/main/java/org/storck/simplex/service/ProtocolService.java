@@ -150,10 +150,13 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
                 SignedProposal<T> signedProposal = MessageUtils.fromBytes(proposalMessage.content(), new TypeReference<>() {
                 });
                 synchronizeIterationNumber(signedProposal.proposal().parentChain());
-                proposalService.processProposal(signedProposal, blockchainService.getBlockchain());
-                votingService.initializeForIteration(iterationNumber, signedProposal.proposal());
-                SignedVote signedVote = votingService.createProposalVote(localPlayerId);
-                peerNetworkClient.broadcastVote(new VoteProtocolMessage(MessageUtils.toBytes(signedVote)));
+                if (proposalService.processProposal(signedProposal, blockchainService.getBlockchain())) {
+                    votingService.initializeForIteration(iterationNumber, signedProposal.proposal());
+                    SignedVote signedVote = votingService.createProposalVote(localPlayerId);
+                    peerNetworkClient.broadcastVote(new VoteProtocolMessage(MessageUtils.toBytes(signedVote)));
+                } else {
+                    log.warn("Received invalid proposal");
+                }
             }
             case FINALIZE_MESSAGE -> {
                 // TODO: handle finalization somehow
