@@ -1,13 +1,8 @@
 version: 2
 updates:
   - package-ecosystem: "gradle"
-    directory: "/"
+    directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
-    versioning-strategy: "auto"
-    allow:
-      - dependency-type: "all"
-    registries:
-      - "maven"
     reviewers:
       - "Steve973"
