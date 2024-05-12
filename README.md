@@ -5,7 +5,7 @@
 Quality and Security Metrics
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4b9194bffb2c42f9902b05c1e8961dd1)](https://app.codacy.com/gh/Steve973/simplex-consensus-protocol/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-[![Dependabot Status](https://badgen.net/github/dependabot/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/dependabot)
+[![Dependabot Status](https://badgen.net/github/dependabot/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/security/dependabot)
 
 Activity
 
