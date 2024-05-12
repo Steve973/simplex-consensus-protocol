@@ -4,19 +4,11 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    versioning-strategy: "lockfile-only"
-    allow:
-      - dependency-type: "all"
-    registries:
-      - "maven"
-    reviewers:
-      - "Steve973"
-
-  - package-ecosystem: "gradle"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    versioning-strategy: "widen"
+    versioning-strategy: 
+      lockfile-only:
+        enabled: true
+      widen:
+        enabled: true
     allow:
       - dependency-type: "all"
     registries:
