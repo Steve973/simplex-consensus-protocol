@@ -10,12 +10,16 @@ import org.storck.simplex.networking.api.network.PeerNetworkClient
 import org.storck.simplex.networking.api.protocol.ProposalProtocolMessage
 import java.util.concurrent.TransferQueue
 
+/**
+ * Test the Proposal Service.
+ */
 @SuppressFBWarnings(
     value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD"],
     justification = "I cannot find anything wrong with the test, and mock objects used in a test do not need to be serializable.")
 class ProposalServiceTest : BehaviorSpec({
 
     val localPlayerId = "localPlayerId"
+    val blockHash = "ABCDEF123456"
     val transactionQueue = mockk<TransferQueue<String>>()
     val signatureService = mockk<DigitalSignatureService>()
     val peerNetworkClient = mockk<PeerNetworkClient>()
@@ -71,13 +75,12 @@ class ProposalServiceTest : BehaviorSpec({
     }
 
     given("checks if the parent hash of a new block is valid based on the expected parent hash computed from the parent block") {
-        val expectedParentHash = "ABCDEF123456"
         val parentBlock = mockk<NotarizedBlock<String>>()
         val newBlock = mockk<Block<String>>()
 
         every { parentBlock.block } returns newBlock
-        every { signatureService.computeBlockHash(any<Block<String>>()) } returns expectedParentHash
-        every { newBlock.parentHash } returns expectedParentHash
+        every { signatureService.computeBlockHash(any<Block<String>>()) } returns blockHash
+        every { newBlock.parentHash } returns blockHash
 
         `when`("Check to see if the parent hash of a new block is valid") {
             val result = proposalService.isParentHashValid(parentBlock, newBlock)
@@ -89,7 +92,6 @@ class ProposalServiceTest : BehaviorSpec({
     }
 
     given("checks if the given proposal is a proper extension of the current notarized blockchain") {
-        val expectedParentHash = "ABCDEF123456"
         val proposal = mockk<Proposal<String>>()
         val parentBlock = mockk<NotarizedBlock<String>>()
         val newBlock = mockk<Block<String>>()
@@ -97,8 +99,8 @@ class ProposalServiceTest : BehaviorSpec({
 
         every { proposal.newBlock } returns newBlock
         every { parentBlock.block } returns newBlock
-        every { signatureService.computeBlockHash(any<Block<String>>()) } returns expectedParentHash
-        every { newBlock.parentHash } returns expectedParentHash
+        every { signatureService.computeBlockHash(any<Block<String>>()) } returns blockHash
+        every { newBlock.parentHash } returns blockHash
         every { newBlock.height } returns 2
         every { parentBlock.block.height } returns 1
 
@@ -114,7 +116,6 @@ class ProposalServiceTest : BehaviorSpec({
     given("Try to propose a new block successfully") {
         val iterationNumber = 1
         val playerId = "testPlayer"
-        val blockHash = "ABCDEF123456"
         val notarizedBlock = mockk<NotarizedBlock<String>>()
         val notarizedBlocks = listOf(notarizedBlock)
         val parentBlock = mockk<Block<String>>()
@@ -148,7 +149,6 @@ class ProposalServiceTest : BehaviorSpec({
 
     given("Process a valid proposal") {
         val iterationNumber = 2
-        val blockHash = "ABCDEF123456"
         val signedProposal = mockk<SignedProposal<String>>()
         val proposal = mockk<Proposal<String>>()
         val parentBlock = mockk<NotarizedBlock<String>>()
