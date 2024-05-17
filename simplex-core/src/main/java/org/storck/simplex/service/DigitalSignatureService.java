@@ -29,18 +29,6 @@ import java.util.stream.IntStream;
 @Getter
 public class DigitalSignatureService {
 
-    /**
-     * Instance of the JsonMapper class, which is used to serialize and deserialize
-     * JSON data.
-     */
-    public static final JsonMapper JSON_MAPPER = new JsonMapper(new JsonFactory());
-
-    /**
-     * The key pair used for cryptographic operations, including signing and
-     * verifying proposals and votes.
-     */
-    private final KeyPair keyPair;
-
     /** Algorithm used for message digest computation. */
     private static final String MESSAGE_DIGEST_ALGORITHM = "SHA3-512";
 
@@ -54,16 +42,63 @@ public class DigitalSignatureService {
     private static final String SIGNATURE_ALGORITHM = "SHA384withECDSA";
 
     /**
+     * Instance of the JsonMapper class, which is used to serialize and deserialize
+     * JSON data.
+     */
+    public static final JsonMapper JSON_MAPPER = new JsonMapper(new JsonFactory());
+
+    /**
+     * The messageDigestAlgorithm variable represents the name of the message digest
+     * algorithm used for hashing.
+     */
+    private final String messageDigestAlgorithm;
+
+    /**
+     * The algorithm used for generating a new KeyPair.
+     *
+     * @see DigitalSignatureService#generateKeyPair()
+     */
+    private final String keypairGeneratorAlgorithm;
+
+    /**
+     * The algorithm used for generating signatures.
+     */
+    private final String signatureAlgorithm;
+
+    /**
+     * The key pair used for cryptographic operations, including signing and
+     * verifying proposals and votes.
+     */
+    private final KeyPair keyPair;
+
+    /**
      * Instance of the BouncyCastleFipsProvider class used as a provider for
      * cryptographic operations.
      */
     private static final BouncyCastleFipsProvider BOUNCY_CASTLE_FIPS_PROVIDER = new BouncyCastleFipsProvider();
 
     /**
-     * Create an instance. A keypair will be generated.
+     * Create an instance with the default algorithm names. A keypair will be
+     * generated.
      */
     @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "If the keypair cannot be generated, this node cannot run anyway")
     public DigitalSignatureService() {
+        this(MESSAGE_DIGEST_ALGORITHM, KEYPAIR_GENERATOR_ALGORITHM, SIGNATURE_ALGORITHM);
+    }
+
+    /**
+     * Create an instance by specifying the algorithm names. A keypair will be
+     * generated.
+     *
+     * @param messageDigestAlgorithm The algorithm used for computing hash values.
+     * @param keypairGeneratorAlgorithm The algorithm used for generating key pairs.
+     * @param signatureAlgorithm The algorithm used for generating signatures.
+     */
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "If the keypair cannot be generated, this node cannot run anyway")
+    public DigitalSignatureService(final String messageDigestAlgorithm, final String keypairGeneratorAlgorithm, final String signatureAlgorithm) {
+        this.messageDigestAlgorithm = messageDigestAlgorithm;
+        this.keypairGeneratorAlgorithm = keypairGeneratorAlgorithm;
+        this.signatureAlgorithm = signatureAlgorithm;
         this.keyPair = generateKeyPair();
     }
 
@@ -80,13 +115,13 @@ public class DigitalSignatureService {
      */
     public String computeBytesHash(final byte[] input) {
         try {
-            MessageDigest digest = MessageDigest.getInstance(MESSAGE_DIGEST_ALGORITHM, BOUNCY_CASTLE_FIPS_PROVIDER);
+            MessageDigest digest = MessageDigest.getInstance(messageDigestAlgorithm, BOUNCY_CASTLE_FIPS_PROVIDER);
             byte[] hashBytes = digest.digest(input);
             return IntStream.range(0, hashBytes.length)
                     .mapToObj(i -> String.format("%02x", hashBytes[i]))
                     .collect(Collectors.joining());
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(MESSAGE_DIGEST_ALGORITHM + " algorithm not available", e);
+            throw new IllegalStateException(messageDigestAlgorithm + " algorithm not available", e);
         }
     }
 
@@ -116,9 +151,9 @@ public class DigitalSignatureService {
      *
      * @return a new KeyPair
      */
-    public static KeyPair generateKeyPair() {
+    public final KeyPair generateKeyPair() {
         try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(KEYPAIR_GENERATOR_ALGORITHM, BOUNCY_CASTLE_FIPS_PROVIDER);
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keypairGeneratorAlgorithm, BOUNCY_CASTLE_FIPS_PROVIDER);
             keyPairGenerator.initialize(384);
             return keyPairGenerator.generateKeyPair();
         } catch (NoSuchAlgorithmException e) {
@@ -137,10 +172,10 @@ public class DigitalSignatureService {
      * @throws IllegalStateException if the encoded public key cannot be converted
      *     to a public key instance
      */
-    public static PublicKey publicKeyFromBytes(final byte[] keyBytes) {
+    public PublicKey publicKeyFromBytes(final byte[] keyBytes) {
         try {
             X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance(KEYPAIR_GENERATOR_ALGORITHM, BOUNCY_CASTLE_FIPS_PROVIDER);
+            KeyFactory keyFactory = KeyFactory.getInstance(keypairGeneratorAlgorithm, BOUNCY_CASTLE_FIPS_PROVIDER);
             return keyFactory.generatePublic(spec);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new IllegalStateException("Could not convert encoded public key to a public key instance", e);
@@ -156,7 +191,7 @@ public class DigitalSignatureService {
      */
     public byte[] generateSignature(final byte[] input) {
         try {
-            Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM, BOUNCY_CASTLE_FIPS_PROVIDER);
+            Signature signature = Signature.getInstance(signatureAlgorithm, BOUNCY_CASTLE_FIPS_PROVIDER);
             signature.initSign(keyPair.getPrivate());
             signature.update(input);
             return signature.sign();
@@ -179,7 +214,7 @@ public class DigitalSignatureService {
      *     during the signature verification process
      */
     public boolean verifySignature(final byte[] input, final byte[] encSignature, final PublicKey publicKey) throws GeneralSecurityException {
-        Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM, BOUNCY_CASTLE_FIPS_PROVIDER);
+        Signature signature = Signature.getInstance(signatureAlgorithm, BOUNCY_CASTLE_FIPS_PROVIDER);
         signature.initVerify(publicKey);
         signature.update(input);
         return signature.verify(encSignature);

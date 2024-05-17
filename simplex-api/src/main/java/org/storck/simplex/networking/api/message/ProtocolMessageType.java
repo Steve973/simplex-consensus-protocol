@@ -23,5 +23,10 @@ public enum ProtocolMessageType {
     /**
      * For block finalization messages.
      */
-    FINALIZE_MESSAGE
+    FINALIZE_MESSAGE,
+
+    /**
+     * For unspecified protocol messages.
+     */
+    OTHER
 }

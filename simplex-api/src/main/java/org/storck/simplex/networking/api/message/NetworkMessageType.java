@@ -8,5 +8,10 @@ public enum NetworkMessageType {
     /**
      * For network event messages.
      */
-    NETWORK_EVENT
+    NETWORK_EVENT,
+
+    /**
+     * For unspecified network messages.
+     */
+    OTHER
 }

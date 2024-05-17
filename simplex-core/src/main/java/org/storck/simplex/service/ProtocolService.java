@@ -2,6 +2,8 @@ package org.storck.simplex.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Charsets;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.storck.simplex.model.NotarizedBlockchain;
 import org.storck.simplex.model.PeerInfo;
@@ -15,13 +17,14 @@ import org.storck.simplex.networking.api.network.NetworkEvent;
 import org.storck.simplex.networking.api.network.NetworkEventMessage;
 import org.storck.simplex.networking.api.network.PeerNetworkClient;
 import org.storck.simplex.networking.api.protocol.ConsensusProtocolService;
+import org.storck.simplex.networking.api.protocol.FinalizeProtocolMessage;
 import org.storck.simplex.networking.api.protocol.ProposalProtocolMessage;
 import org.storck.simplex.networking.api.protocol.VoteProtocolMessage;
 import org.storck.simplex.util.MessageUtils;
 
 import java.security.PublicKey;
 import java.util.Collection;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -31,6 +34,7 @@ import java.util.UUID;
  * @param <T> the transaction data type
  */
 @Slf4j
+@SuppressWarnings("PMD.CouplingBetweenObjects") // This main service class needs these objects
 public class ProtocolService<T> implements ConsensusProtocolService<T> {
 
     /** The ID of the local player (i.e., the ID for this local node). */
@@ -43,6 +47,11 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
      * Manages all peers/players that are participating.
      */
     private final PlayerService playerService;
+
+    /**
+     * Manages the player's keypair, and digital signature functions.
+     */
+    private final DigitalSignatureService signatureService;
 
     /**
      * Manages the creation, validation, and broadcasting of block proposals by the
@@ -71,7 +80,10 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
      */
     private final IterationService iterationService;
 
-    /** Flag that can be set to true to stop the service. */
+    /**
+     * Flag that can be set to true to stop the service.
+     */
+    @Getter
     private boolean shutdown;
 
     /**
@@ -80,15 +92,53 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
      * @param peerNetworkClient the client for network operations and information
      */
     public ProtocolService(final PeerNetworkClient peerNetworkClient) {
-        this.localPlayerId = UUID.randomUUID().toString();
-        this.iterationNumber = 0;
-        this.playerService = new PlayerService();
-        DigitalSignatureService signatureService = new DigitalSignatureService();
-        this.proposalService = new ProposalService<>(localPlayerId, signatureService, peerNetworkClient);
-        this.votingService = new VotingService<>(signatureService, playerService);
-        this.blockchainService = new BlockchainService<>();
+        this(UUID.randomUUID().toString(), 0, new PlayerService(), new DigitalSignatureService(), new BlockchainService<>(), peerNetworkClient);
+    }
+
+    /**
+     * Constructs a new instance of the ProtocolService.
+     *
+     * @param localPlayerId the ID of the local player
+     * @param iterationNumber the iteration number
+     * @param playerService the player service instance
+     * @param signatureService the digital signature service instance
+     * @param blockchainService the blockchain service instance
+     * @param peerNetworkClient the peer network client instance
+     */
+    @SuppressFBWarnings(value = { "EI_EXPOSE_REP2" }, justification = "You have to set final variables from a constructor.")
+    public ProtocolService(final String localPlayerId, final int iterationNumber, final PlayerService playerService, final DigitalSignatureService signatureService,
+            final BlockchainService<T> blockchainService, final PeerNetworkClient peerNetworkClient) {
+        this(localPlayerId, iterationNumber, playerService, signatureService, new ProposalService<>(localPlayerId, signatureService, peerNetworkClient),
+                new VotingService<>(signatureService, playerService), blockchainService, peerNetworkClient,
+                new IterationService(localPlayerId, playerService, signatureService, peerNetworkClient));
+    }
+
+    /**
+     * Constructs a new instance of the ProtocolService.
+     *
+     * @param localPlayerId the ID of the local player
+     * @param iterationNumber the iteration number
+     * @param playerService the player service instance
+     * @param signatureService the digital signature service instance
+     * @param proposalService the proposal service instance
+     * @param votingService the voting service instance
+     * @param blockchainService the blockchain service instance
+     * @param peerNetworkClient the peer network client instance
+     * @param iterationService the iteration service instance
+     */
+    @SuppressFBWarnings(value = { "EI_EXPOSE_REP2" }, justification = "You have to set final variables from a constructor.")
+    public ProtocolService(final String localPlayerId, final int iterationNumber, final PlayerService playerService, final DigitalSignatureService signatureService,
+            final ProposalService<T> proposalService, final VotingService<T> votingService, final BlockchainService<T> blockchainService, final PeerNetworkClient peerNetworkClient,
+            final IterationService iterationService) {
+        this.localPlayerId = localPlayerId;
+        this.iterationNumber = iterationNumber;
+        this.playerService = playerService;
+        this.signatureService = signatureService;
+        this.proposalService = proposalService;
+        this.votingService = votingService;
+        this.blockchainService = blockchainService;
         this.peerNetworkClient = peerNetworkClient;
-        this.iterationService = new IterationService(localPlayerId, playerService, signatureService, peerNetworkClient);
+        this.iterationService = iterationService;
     }
 
     /**
@@ -98,7 +148,10 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
      */
     @Override
     public void processNetworkMessage(final NetworkMessage message) {
-        if (Objects.requireNonNull(message.getMessageType()) == NetworkMessageType.NETWORK_EVENT) {
+        NetworkMessageType messageType = Optional.ofNullable(message)
+                .map(NetworkMessage::getMessageType)
+                .orElse(NetworkMessageType.OTHER);
+        if (NetworkMessageType.NETWORK_EVENT == messageType) {
             NetworkEventMessage eventMessage = (NetworkEventMessage) message;
             NetworkEvent networkEvent = eventMessage.event();
             switch (networkEvent) {
@@ -108,16 +161,17 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
                     if (removedPlayerKey == null) {
                         log.warn("Tried to remove unknown peer with peerId: '{}'", peerInfo.peerId());
                     } else {
-                        log.info("Removed peer with peerId: '{}' and public key: '{}'", peerInfo.peerId(), new String(removedPlayerKey.getEncoded(), Charsets.UTF_8));
+                        log.info("Removed peer with peerId: '{}' and public key: '{}'", peerInfo.peerId(),
+                                new String(removedPlayerKey.getEncoded(), Charsets.UTF_8));
                     }
                 }
                 case PEER_CONNECTED -> {
                     PeerInfo peerInfo = MessageUtils.peerInfoFromJson(eventMessage.details());
                     byte[] publicKeyBytes = peerInfo.publicKeyBytes();
-                    PublicKey publicKey = DigitalSignatureService.publicKeyFromBytes(publicKeyBytes);
+                    PublicKey publicKey = signatureService.publicKeyFromBytes(publicKeyBytes);
                     playerService.addPlayer(peerInfo.peerId(), publicKey);
                 }
-                default -> log.warn("Received unknown network message type: '{}'", message.getMessageType());
+                default -> log.warn("Received unknown network message type: '{}'", networkEvent.name());
             }
         }
     }
@@ -159,7 +213,9 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
                 }
             }
             case FINALIZE_MESSAGE -> {
+                FinalizeProtocolMessage finalizeMessage = (FinalizeProtocolMessage) message;
                 // TODO: handle finalization somehow
+                log.info("Received finalize message for iteration number: {}", finalizeMessage.iterationNumber());
             }
             default -> log.warn("Message type unrecognized: {}", messageType);
         }
@@ -201,7 +257,7 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
     @Override
     public void start() {
         while (!shutdown) {
-            this.iterationService.initializeForIteration(++iterationNumber);
+            iterationService.initializeForIteration(++iterationNumber);
             iterationService.startIteration();
             if (localPlayerId.equals(iterationService.getLeaderId())) {
                 proposalService.proposeNewBlock(blockchainService.getBlockchain(), iterationNumber);
