@@ -81,7 +81,7 @@ class VotingServiceTest : BehaviorSpec({
             every { vote.blockHash() } returns blockHash
             val result = VotingService.isVoteIdProposalId(vote, blockHash)
 
-            Then("it should be valid") {
+            Then("vote id and proposal id should be the same") {
                 result shouldBe true
             }
         }
@@ -89,7 +89,7 @@ class VotingServiceTest : BehaviorSpec({
         When("vote is from a known player") {
             val result = VotingService.isVoteFromKnownPlayer(playerId, playerService)
 
-            Then("it should be valid") {
+            Then("vote should be from known player") {
                 result shouldBe true
             }
         }
@@ -98,7 +98,7 @@ class VotingServiceTest : BehaviorSpec({
             val signedVote = SignedVote(Vote(playerId, iterationNumber, blockHash), byteArrayOf())
             val result = VotingService.isVoteSignatureValid(mockk(), signedVote, digitalSignatureService)
 
-            Then("it should be valid") {
+            Then("vote signature should be valid") {
                 result shouldBe true
             }
         }
@@ -149,8 +149,7 @@ class VotingServiceTest : BehaviorSpec({
         }
 
         When("Creating a proposal vote") {
-            val localPlayerId = "player1"
-            val result = votingService.createProposalVote(localPlayerId)
+            val result = votingService.createProposalVote(playerId)
 
             Then("it should return a valid signed vote") {
                 result shouldBe instanceOf<SignedVote>()

@@ -20,6 +20,10 @@ import java.security.PublicKey
 class DigitalSignatureServiceTest : BehaviorSpec({
 
     val signatureService = DigitalSignatureService()
+    val messageDigestAlgorithm = "SHA-256"
+    val keypairGeneratorAlgorithm = "RSA"
+    val signatureAlgorithm = "SHA256withRSA"
+    val badAlgorithm = "OOPS"
 
     Given("a DigitalSignatureService instance with key pair") {
         val input = byteArrayOf(1, 2, 3, 4, 5)
@@ -120,9 +124,6 @@ class DigitalSignatureServiceTest : BehaviorSpec({
     }
 
     Given("the instance is constructed with algorithm names") {
-        val messageDigestAlgorithm = "SHA-256"
-        val keypairGeneratorAlgorithm = "RSA"
-        val signatureAlgorithm = "SHA256withRSA"
         val sigSvc = DigitalSignatureService(messageDigestAlgorithm, keypairGeneratorAlgorithm, signatureAlgorithm)
 
         When("the algorithm names are retrieved") {
@@ -139,50 +140,41 @@ class DigitalSignatureServiceTest : BehaviorSpec({
     }
 
     Given("the service is created with a bad message digest algorithm") {
-        val messageDigestAlgorithm = "OOPS"
-        val keypairGeneratorAlgorithm = "RSA"
-        val signatureAlgorithm = "SHA256withRSA"
-        val sigSvc = DigitalSignatureService(messageDigestAlgorithm, keypairGeneratorAlgorithm, signatureAlgorithm)
+        val sigSvc = DigitalSignatureService(badAlgorithm, keypairGeneratorAlgorithm, signatureAlgorithm)
 
         When("a message digest is requested") {
             val exception = shouldThrow<IllegalStateException> {
                 sigSvc.computeBytesHash(byteArrayOf(1, 2, 3, 4, 5))
             }
 
-            Then("Error message should indicate that the algorithm is invalid") {
-                exception.message shouldBe "$messageDigestAlgorithm algorithm not available"
+            Then("Error message should indicate that the message digest algorithm is invalid") {
+                exception.message shouldBe "$badAlgorithm algorithm not available"
             }
         }
     }
 
     Given("the service is created with a bad signature algorithm") {
-        val messageDigestAlgorithm = "SHA-256"
-        val keypairGeneratorAlgorithm = "RSA"
-        val signatureAlgorithm = "OOPS"
-        val sigSvc = DigitalSignatureService(messageDigestAlgorithm, keypairGeneratorAlgorithm, signatureAlgorithm)
+        val sigSvc = DigitalSignatureService(messageDigestAlgorithm, keypairGeneratorAlgorithm, badAlgorithm)
 
-        When("a message digest is requested") {
+        When("a digital signature is requested") {
             val exception = shouldThrow<IllegalStateException> {
                 sigSvc.generateSignature(byteArrayOf(1, 2, 3, 4, 5))
             }
 
-            Then("Error message should indicate that the algorithm is invalid") {
+            Then("Error message should indicate that the digital signature algorithm is invalid") {
                 exception.message shouldBe "Unexpected error when generating a signature"
             }
         }
     }
 
     Given("the service is created with a bad keypair generator algorithm") {
-        val messageDigestAlgorithm = "SHA-256"
-        val keypairGeneratorAlgorithm = "OOPS"
-        val signatureAlgorithm = "SHA256withRSA"
 
-        When("a message digest is requested") {
+        When("a keypair is requested") {
             val exception = shouldThrow<IllegalStateException> {
-                DigitalSignatureService(messageDigestAlgorithm, keypairGeneratorAlgorithm, signatureAlgorithm)
+                DigitalSignatureService(messageDigestAlgorithm, badAlgorithm, signatureAlgorithm)
             }
 
-            Then("Error message should indicate that the algorithm is invalid") {
+            Then("Error message should indicate that the key generation algorithm is invalid") {
                 exception.message shouldBe "Could not generate a key pair for cryptological operations"
             }
         }
