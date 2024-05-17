@@ -1,10 +1,11 @@
 import com.github.spotbugs.snom.Confidence
 import com.github.spotbugs.snom.Effort
 import com.github.spotbugs.snom.SpotBugsTask
-import gradle.kotlin.dsl.accessors._984b42742b1efd04b12d9b66321c4910.pitest
+import info.solidsoft.gradle.pitest.PitestPluginExtension
 
 plugins {
     checkstyle
+    jacoco
     pmd
     id("com.github.spotbugs")
     id("info.solidsoft.pitest")
@@ -15,7 +16,20 @@ checkstyle {
     configFile = file("${rootProject.projectDir}/project-resources/checkstyle/checkstyle.xml")
 }
 
-pitest {
+tasks.named("test") {
+    finalizedBy("jacocoTestReport")
+}
+
+tasks.withType<JacocoReport> {
+    reports {
+        xml.required = true
+        html.required = true
+        html.outputLocation = layout.buildDirectory.dir("reports/jacoco")
+    }
+    dependsOn("test")
+}
+
+configure<PitestPluginExtension> {
     junit5PluginVersion.set("1.2.0")
     threads.set(4)
     targetClasses.set(listOf("org.storck.simplex.*"))

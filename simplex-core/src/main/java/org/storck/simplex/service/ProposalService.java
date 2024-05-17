@@ -67,6 +67,16 @@ public class ProposalService<T> {
     }
 
     /**
+     * Retrieves a "view", of sorts, of all transactions from the transaction queue.
+     *
+     * @return a list containing all transactions in the transaction queue
+     */
+    @SuppressWarnings("unchecked")
+    public List<T> getTransactions() {
+        return (List<T>) List.of(transactionQueue.toArray());
+    }
+
+    /**
      * Determines if the given proposal is for the current iteration of the
      * notarized chain.
      *

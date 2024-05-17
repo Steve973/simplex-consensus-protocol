@@ -35,6 +35,13 @@ Interest
 This project attempts to create a Java implementation of the Simplex Consensus Protocol.  For maximum flexibility and
 usability, the library has been implemented in a layered approach.
 
+## Project Status
+
+Currently, this library is in the pre-alpha stage, where initial development is ongoing.  It is still being developed
+and tested, so it will be some time before the first version is released (even a beta).  If you would like to help, the
+peer-to-peer networking still needs to be figured out.  Development is very active, and there should be commits (nearly)
+daily.  Do not hesitate to reach out if you have comments, questions, requests, or suggestions.
+
 ## Layered Approach
 
 - *Core library layer*:

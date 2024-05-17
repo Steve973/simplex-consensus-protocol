@@ -1,6 +1,7 @@
 package org.storck.simplex.service;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import org.storck.simplex.model.Proposal;
 import org.storck.simplex.model.SignedVote;
@@ -37,12 +38,22 @@ public class VotingService<T> {
     /**
      * The current iteration number for "this" round of voting.
      */
+    @Getter
     private int iterationNumber;
 
     /**
      * The ID (hash) of the current proposal for "this" round of voting.
      */
     private String proposalId;
+
+    /**
+     * Get a copy of the proposal ID.
+     *
+     * @return a copy of the proposal ID
+     */
+    public String getProposalId() {
+        return String.copyValueOf(proposalId.toCharArray());
+    }
 
     /**
      * Create the service.

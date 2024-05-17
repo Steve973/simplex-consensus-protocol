@@ -22,5 +22,10 @@ public enum NetworkEvent {
     /**
      * For notifications when the network is restored.
      */
-    NETWORK_RESTORED
+    NETWORK_RESTORED,
+
+    /**
+     * For unspecified network events.
+     */
+    OTHER
 }

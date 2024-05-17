@@ -7,6 +7,7 @@ import org.storck.simplex.model.Vote;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -39,23 +40,15 @@ public class BlockchainService<T> {
 
     /**
      * Creates a notarized block using the given block and set of quorum votes.
-     *
-     * @param <T> the type of the transactions stored in the block
-     * @param block the block of transactions
-     * @param quorumVotes the list of quorum votes
-     *
-     * @return a notarized block with the given block and quorum votes
      */
-    public static <T> NotarizedBlock<T> createNotarizedBlock(final Block<T> block, final List<Vote> quorumVotes) {
-        return new NotarizedBlock<>(block, quorumVotes);
-    }
+    public final BiFunction<Block<T>, List<Vote>, NotarizedBlock<T>> createNotarizedBlock = NotarizedBlock::new;
 
     /**
      * Create the service to maintain the blockchain and create specialized blocks.
      */
     public BlockchainService() {
         this.notarizedBlockchain = new NotarizedBlockchain<>(new ArrayList<>());
-        notarizedBlockchain.blocks().add(new NotarizedBlock<>(createGenesisBlock.get(), List.of()));
+        notarizedBlockchain.addBlock(new NotarizedBlock<>(createGenesisBlock.get(), List.of()));
     }
 
     /**

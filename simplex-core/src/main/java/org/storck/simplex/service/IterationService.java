@@ -55,6 +55,7 @@ public class IterationService {
     /**
      * The iteration number to which this iteration instance pertains.
      */
+    @Getter
     private int iterationNumber;
 
     /**
