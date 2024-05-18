@@ -29,6 +29,8 @@ import java.security.PublicKey
     value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "NP_NULL_ON_SOME_PATH", "RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT"],
     justification = "I cannot find anything wrong with the test, and mock objects used in a test do not need to be serializable.")
 class ProtocolServiceTest : BehaviorSpec({
+    val details = "details"
+    val peerId = "peerId"
     val localPlayerId = "testPlayer"
     val iterationNumber = 0
     val playerService = mockk<PlayerService>()
@@ -65,9 +67,7 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("a peer connected message") {
-        val peerId = "peerId"
         val publicKeyBytes = byteArrayOf(0x01, 0x02, 0x03)
-        val details = "details"
         val mockPeerInfo = mockk<PeerInfo>()
         val mockPublicKey = mockk<PublicKey>()
         val message = NetworkEventMessage(NetworkEvent.PEER_CONNECTED, details)
@@ -89,10 +89,8 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("a peer disconnected message") {
-        val peerId = "peerId"
         val publicKeyEncoded = "publicKeyEncoded"
         val publicKeyBytes = publicKeyEncoded.toByteArray()
-        val details = "details"
         val mockPeerInfo = mockk<PeerInfo>()
         val mockPublicKey = mockk<PublicKey>()
         val message = NetworkEventMessage(NetworkEvent.PEER_DISCONNECTED, details)
@@ -113,10 +111,8 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("a message from an unknown peer") {
-        val peerId = "peerId"
         val publicKeyEncoded = "publicKeyEncoded"
         val publicKeyBytes = publicKeyEncoded.toByteArray()
-        val details = "details"
         val mockPeerInfo = mockk<PeerInfo>()
         val mockPublicKey = mockk<PublicKey>()
         val message = NetworkEventMessage(NetworkEvent.PEER_DISCONNECTED, details)
