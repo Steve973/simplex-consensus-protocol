@@ -8,7 +8,7 @@ import org.storck.simplex.model.Vote;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 /**
@@ -26,7 +26,7 @@ public class BlockchainService<T> {
     /**
      * Creates a dummy block with the specified iteration number.
      */
-    public final Function<Integer, Block<T>> createDummyBlock = i -> new Block<>(i, "", List.of());
+    public final IntFunction<Block<T>> createDummyBlock = i -> new Block<>(i, "", List.of());
 
     /**
      * Creates the genesis block of a blockchain.
@@ -36,7 +36,7 @@ public class BlockchainService<T> {
     /**
      * Creates the genesis block of a blockchain.
      */
-    public final Function<Integer, Block<T>> createFinalizeBlock = i -> new Block<>(i, "FINALIZE", List.of());
+    public final IntFunction<Block<T>> createFinalizeBlock = i -> new Block<>(i, "FINALIZE", List.of());
 
     /**
      * Creates a notarized block using the given block and set of quorum votes.

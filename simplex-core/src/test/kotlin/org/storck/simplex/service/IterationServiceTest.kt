@@ -1,42 +1,44 @@
 package org.storck.simplex.service
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import kotlinx.coroutines.*
+import io.kotest.matchers.shouldNotBe
+import io.mockk.*
+import kotlinx.coroutines.delay
 import org.storck.simplex.networking.api.network.PeerNetworkClient
+import java.util.concurrent.CountDownLatch
+import kotlin.concurrent.thread
 
 /**
  * Test the Blockchain Service.
  */
-@OptIn(DelicateCoroutinesApi::class)
 @SuppressFBWarnings(
     value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "NP_NULL_ON_SOME_PATH"],
-    justification = "I cannot find anything wrong with the test, and mock objects used in a test do not need to be serializable.")
-class IterationServiceTest: BehaviorSpec({
+    justification = "I cannot find anything wrong with the test, and mock objects used in a test do not need to be serializable."
+)
+class IterationServiceTest : BehaviorSpec({
     val localPlayerId = "testPlayer"
     val iterationNumber = 1
     val networkDeltaSeconds = 1
     val players = listOf("player1", "player2")
     val signatureBytes = ByteArray(64)
     val playerService = mockk<PlayerService>()
+    val latch = mockk<CountDownLatch>()
     val digitalSignatureService = mockk<DigitalSignatureService>()
     val peerNetworkClient = mockk<PeerNetworkClient>(relaxed = true)
 
-    Given("IterationService is initialized with certain services"){
-        val iterationService = IterationService(localPlayerId, playerService, digitalSignatureService, peerNetworkClient)
+    Given("IterationService is initialized with certain services") {
+        val iterationService =
+            IterationService(localPlayerId, playerService, digitalSignatureService, peerNetworkClient)
 
         When("initializeForIteration method is called") {
 
             every { playerService.playerIds } returns players
             every { digitalSignatureService.computeBytesHash(any<ByteArray>()) } returns "hash"
 
-            iterationService.initializeForIteration(iterationNumber)
+            iterationService.initializeForIteration(iterationNumber, latch)
 
             Then("electLeader method is called with the iteration number") {
                 iterationService.iterationNumber shouldBe iterationNumber
@@ -44,23 +46,25 @@ class IterationServiceTest: BehaviorSpec({
             }
         }
 
-        When("startIteration method is called"){
+        When("startIteration method is called") {
             every { peerNetworkClient.getNetworkDeltaSeconds() } returns networkDeltaSeconds
             every { digitalSignatureService.computeBytesHash(any<ByteArray>()) } returns "hash"
             every { digitalSignatureService.generateSignature(any<ByteArray>()) } returns signatureBytes
 
             iterationService.startIteration()
 
-            Then("broadcastVote is invoked on PeerNetworkClient"){
+            Then("broadcastVote is invoked on PeerNetworkClient") {
                 verify { peerNetworkClient.getNetworkDeltaSeconds() }
                 verify { digitalSignatureService.computeBytesHash(any<ByteArray>()) }
             }
         }
 
-        When("stopIteration method is called"){
+        When("stopIteration method is called") {
+            every { latch.countDown() } just Runs
+
             iterationService.stopIteration()
 
-            Then("timer is cancelled and iteration is stopped"){
+            Then("timer is cancelled and iteration is stopped") {
                 // Check by trying to start again and seeing if the exceptions are handled
                 shouldThrowAny { iterationService.startIteration() }
             }
@@ -69,11 +73,12 @@ class IterationServiceTest: BehaviorSpec({
         When("awaitCompletion method is called") {
             every { peerNetworkClient.getNetworkDeltaSeconds() } returns networkDeltaSeconds
             every { digitalSignatureService.generateSignature(any<ByteArray>()) } returns signatureBytes
+            every { latch.await() } just Runs
 
-            iterationService.initializeForIteration(iterationNumber)
+            iterationService.initializeForIteration(iterationNumber, latch)
             iterationService.startIteration()
 
-            Then("awaitCompletion should successfully complete"){
+            Then("awaitCompletion should successfully complete") {
                 iterationService.awaitCompletion()
             }
         }
@@ -83,16 +88,21 @@ class IterationServiceTest: BehaviorSpec({
         val iterationService = IterationService(localPlayerId, playerService, digitalSignatureService, peerNetworkClient)
 
         When("awaitCompletion method is called") {
-            val exception = shouldThrow<IllegalStateException> {
-                withTimeout(100) {
-                    runInterruptible {
-                        iterationService.awaitCompletion()
-                    }
+            val realLatch = CountDownLatch(1)
+            iterationService.initializeForIteration(iterationNumber, realLatch)
+            var exception: Throwable? = null
+            val testThread = thread {
+                try {
+                    iterationService.awaitCompletion()
+                } catch (e: Throwable) {
+                    exception = e
                 }
             }
+            delay(100)
+            testThread.interrupt()
 
-            Then("exception should indicate the interruption while waiting for completion") {
-                exception.message shouldBe "Unexpected error while waiting for iteration completion"
+            Then("exception should have been thrown") {
+                exception shouldNotBe null
             }
         }
     }

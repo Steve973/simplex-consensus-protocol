@@ -1,7 +1,6 @@
 package org.storck.simplex.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.common.base.Charsets;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +21,12 @@ import org.storck.simplex.networking.api.protocol.ProposalProtocolMessage;
 import org.storck.simplex.networking.api.protocol.VoteProtocolMessage;
 import org.storck.simplex.util.MessageUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Orchestrates the overall execution of the Simplex Consensus Protocol,
@@ -162,7 +163,7 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
                         log.warn("Tried to remove unknown peer with peerId: '{}'", peerInfo.peerId());
                     } else {
                         log.info("Removed peer with peerId: '{}' and public key: '{}'", peerInfo.peerId(),
-                                new String(removedPlayerKey.getEncoded(), Charsets.UTF_8));
+                                new String(removedPlayerKey.getEncoded(), StandardCharsets.UTF_8));
                     }
                 }
                 case PEER_CONNECTED -> {
@@ -253,11 +254,15 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
      * a proposal if the local player is the leader. 3. Listens for, validates, and
      * processes proposals and votes. 4. Outputs accepted transactions to the
      * client.
+     *
+     * @throws InterruptedException if interrupted while awaiting completion from
+     *     the iteration service
      */
     @Override
-    public void start() {
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    public void start() throws InterruptedException {
         while (!shutdown) {
-            iterationService.initializeForIteration(++iterationNumber);
+            iterationService.initializeForIteration(++iterationNumber, new CountDownLatch(1));
             iterationService.startIteration();
             if (localPlayerId.equals(iterationService.getLeaderId())) {
                 proposalService.proposeNewBlock(blockchainService.getBlockchain(), iterationNumber);

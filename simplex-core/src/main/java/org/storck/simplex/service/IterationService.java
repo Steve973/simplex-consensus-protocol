@@ -1,6 +1,5 @@
 package org.storck.simplex.service;
 
-import com.google.common.base.Charsets;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import org.storck.simplex.model.SignedVote;
@@ -10,6 +9,7 @@ import org.storck.simplex.networking.api.protocol.VoteProtocolMessage;
 import org.storck.simplex.util.MessageUtils;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -31,11 +31,6 @@ public class IterationService {
      * The player ID for this (local) node.
      */
     private final String localPlayerId;
-
-    /**
-     * The latch to wait for the iteration to complete.
-     */
-    private final CountDownLatch countDownLatch;
 
     /**
      * The service that manages players participating in the protocol.
@@ -65,13 +60,19 @@ public class IterationService {
     private String leaderId;
 
     /**
+     * The latch to wait for the iteration to complete.
+     */
+    private CountDownLatch countDownLatch;
+
+    /**
      * The timer to fire when the duration of this iteration expires.
      */
     private Timer timer;
 
     /**
      * Create a service instance that will need to be further initialized by calling
-     * {@link #initializeForIteration(int)} with the iteration number.
+     * {@link #initializeForIteration(int, CountDownLatch)} with the iteration
+     * number.
      *
      * @param localPlayerId the player/peer ID of this (local) node
      * @param playerService the service that manages players/peers and their public
@@ -88,7 +89,6 @@ public class IterationService {
         this.playerService = playerService;
         this.digitalSignatureService = digitalSignatureService;
         this.peerNetworkClient = peerNetworkClient;
-        this.countDownLatch = new CountDownLatch(1);
     }
 
     /**
@@ -97,10 +97,12 @@ public class IterationService {
      * duration.
      *
      * @param iterationNumber the iteration number
+     * @param countDownLatch the latch to wait for the completion of the iteration
      */
-    public void initializeForIteration(final int iterationNumber) {
+    public void initializeForIteration(final int iterationNumber, final CountDownLatch countDownLatch) {
         this.iterationNumber = iterationNumber;
         this.leaderId = electLeader(iterationNumber);
+        this.countDownLatch = countDownLatch;
         this.timer = new Timer(TIMER_NAME_PREFIX + iterationNumber);
     }
 
@@ -113,8 +115,8 @@ public class IterationService {
      */
     String electLeader(final long iteration) {
         List<String> participantIds = playerService.getPlayerIds();
-        String hash = digitalSignatureService.computeBytesHash(Long.toString(iteration).getBytes(Charsets.UTF_8));
-        BigInteger hashInt = new BigInteger(1, hash.getBytes(Charsets.UTF_8));
+        String hash = digitalSignatureService.computeBytesHash(Long.toString(iteration).getBytes(StandardCharsets.UTF_8));
+        BigInteger hashInt = new BigInteger(1, hash.getBytes(StandardCharsets.UTF_8));
         return participantIds.get(hashInt.mod(BigInteger.valueOf(participantIds.size())).intValue());
     }
 
@@ -151,12 +153,10 @@ public class IterationService {
 
     /**
      * Await the completion of this iteration.
+     *
+     * @throws InterruptedException if interrupted while waiting for completion
      */
-    public void awaitCompletion() {
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            throw new IllegalStateException("Unexpected error while waiting for iteration completion", e);
-        }
+    public void awaitCompletion() throws InterruptedException {
+        this.countDownLatch.await();
     }
 }
