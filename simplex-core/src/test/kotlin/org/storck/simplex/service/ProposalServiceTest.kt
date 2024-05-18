@@ -25,13 +25,13 @@ class ProposalServiceTest : BehaviorSpec({
     val transactionQueue = mockk<TransferQueue<String>>()
     val signatureService = mockk<DigitalSignatureService>()
     val peerNetworkClient = mockk<PeerNetworkClient>()
+    val proposal = mockk<Proposal<String>>()
+    val notarizedBlock = mockk<NotarizedBlock<String>>()
+    val notarizedBlocks = listOf(notarizedBlock)
 
     val proposalService = ProposalService<String>(localPlayerId, signatureService, peerNetworkClient)
 
     given("checks if proposal is for current iteration") {
-        val proposal = mockk<Proposal<String>>()
-        val notarizedBlock = mockk<NotarizedBlock<String>>()
-        val notarizedBlocks = listOf(notarizedBlock)
 
         every { proposal.iteration } returns 2
 
@@ -45,9 +45,6 @@ class ProposalServiceTest : BehaviorSpec({
     }
 
     given("checks if proposal is for the wrong iteration") {
-        val proposal = mockk<Proposal<String>>()
-        val notarizedBlock = mockk<NotarizedBlock<String>>()
-        val notarizedBlocks = listOf(notarizedBlock)
 
         every { proposal.iteration } returns 3
 
@@ -61,9 +58,6 @@ class ProposalServiceTest : BehaviorSpec({
     }
 
     given("checks if the parent chain of a proposal is the current notarized chain") {
-        val proposal = mockk<Proposal<String>>()
-        val notarizedBlock = mockk<NotarizedBlock<String>>()
-        val notarizedBlocks = listOf(notarizedBlock)
 
         every { proposal.parentChain.blocks } returns notarizedBlocks
 
@@ -143,17 +137,14 @@ class ProposalServiceTest : BehaviorSpec({
     }
 
     given("checks if the given proposal is a proper extension of the current notarized blockchain") {
-        val proposal = mockk<Proposal<String>>()
-        val parentBlock = mockk<NotarizedBlock<String>>()
         val newBlock = mockk<Block<String>>()
-        val notarizedBlocks = listOf(parentBlock)
 
         every { proposal.newBlock } returns newBlock
-        every { parentBlock.block } returns newBlock
+        every { notarizedBlock.block } returns newBlock
         every { signatureService.computeBlockHash(any<Block<String>>()) } returns blockHash
         every { newBlock.parentHash } returns blockHash
         every { newBlock.height } returns 2
-        every { parentBlock.block.height } returns 1
+        every { notarizedBlock.block.height } returns 1
 
         `when`("Check to see if the proposed block is a proper extension of the blockchain") {
             val result = proposalService.isProperBlockchainExtension(proposal, notarizedBlocks)
@@ -165,10 +156,8 @@ class ProposalServiceTest : BehaviorSpec({
     }
 
     given("checks if the given proposal is an improper extension of the current notarized blockchain") {
-        val proposal = mockk<Proposal<String>>()
         val parentBlock = mockk<NotarizedBlock<String>>()
         val newBlock = mockk<Block<String>>()
-        val notarizedBlocks = listOf(parentBlock)
 
         every { proposal.newBlock } returns newBlock
         every { parentBlock.block } returns newBlock
@@ -213,8 +202,6 @@ class ProposalServiceTest : BehaviorSpec({
     given("Try to propose a new block successfully") {
         val iterationNumber = 1
         val playerId = "testPlayer"
-        val notarizedBlock = mockk<NotarizedBlock<String>>()
-        val notarizedBlocks = listOf(notarizedBlock)
         val parentBlock = mockk<Block<String>>()
         val transaction = "test transaction"
         val transactions = listOf(transaction)
@@ -246,8 +233,6 @@ class ProposalServiceTest : BehaviorSpec({
 
     given("Try to propose a new block with absent parent block hash") {
         val iterationNumber = 1
-        val notarizedBlock = mockk<NotarizedBlock<String>>()
-        val notarizedBlocks = listOf(notarizedBlock)
         val parentBlock = mockk<Block<String>>()
 
         every { transactionQueue.drainTo(any<ArrayList<String>>()) } returns 1
@@ -268,16 +253,13 @@ class ProposalServiceTest : BehaviorSpec({
     given("Process a valid proposal") {
         val iterationNumber = 2
         val signedProposal = mockk<SignedProposal<String>>()
-        val proposal = mockk<Proposal<String>>()
-        val parentBlock = mockk<NotarizedBlock<String>>()
-        val notarizedBlocks = listOf(parentBlock)
         val newBlock = mockk<Block<String>>()
 
         every { proposal.iteration } returns iterationNumber
         every { proposal.parentChain.blocks } returns notarizedBlocks
         every { proposal.newBlock } returns newBlock
         every { newBlock.height } returns 2
-        every { parentBlock.block.height } returns 1
+        every { notarizedBlock.block.height } returns 1
         every { newBlock.parentHash } returns blockHash
         every { signedProposal.proposal } returns proposal
         every { signatureService.computeBlockHash(any<Block<String>>()) } returns blockHash
@@ -295,9 +277,7 @@ class ProposalServiceTest : BehaviorSpec({
     given("Process an invalid proposal") {
         val iterationNumber = 2
         val signedProposal = mockk<SignedProposal<String>>()
-        val proposal = mockk<Proposal<String>>()
         val parentBlock = mockk<NotarizedBlock<String>>()
-        val notarizedBlocks = listOf(parentBlock)
         val newBlock = mockk<Block<String>>()
 
         every { proposal.iteration } returns iterationNumber
