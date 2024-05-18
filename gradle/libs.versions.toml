@@ -12,6 +12,8 @@ netty = "4.1.109.Final"
 pitest = "1.15.0"
 slf4j = "2.0.13"
 sonarqube = "5.0.0.4638"
+spotbugs = "6.0.14"
+spotbugsAnnotations = "4.8.5"
 spotless = "6.25.0"
 
 [libraries]
@@ -35,6 +37,8 @@ pitest-plugin = { module = "info.solidsoft.gradle.pitest:gradle-pitest-plugin", 
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 sonarqube-plugin = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin", version.ref = "sonarqube" }
+spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", version.ref = "spotbugsAnnotations" }
+spotbugs-plugin = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version.ref = "spotbugs" }
 spotless-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 
 [bundles]
@@ -45,4 +49,5 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 licenseReport = { id = "com.github.jk1.dependency-license-report", version.ref = "dependencyLicenseReport" }
 sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
 pitest = { id = "info.solidsoft.pitest", version.ref = "pitest" }
+spotbugs = { id = "com.github.spotbugs", version.ref = "spotbugs" }
 spotless = { id = "com.diffplug.gradle.spotless", version.ref = "spotless" }

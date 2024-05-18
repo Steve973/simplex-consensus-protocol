@@ -1,5 +1,6 @@
 package org.storck.simplex.service
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -10,6 +11,9 @@ import org.storck.simplex.model.NotarizedBlock
 /**
  * Test the Blockchain Service.
  */
+@SuppressFBWarnings(
+    value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD"],
+    justification = "I cannot find anything wrong with the test, and mock objects used in a test do not need to be serializable.")
 class BlockchainServiceTest : BehaviorSpec({
 
     given("A BlockchainService") {

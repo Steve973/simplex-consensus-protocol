@@ -2,6 +2,7 @@ package org.storck.simplex.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Charsets;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.storck.simplex.model.NotarizedBlockchain;
@@ -33,6 +34,7 @@ import java.util.UUID;
  * @param <T> the transaction data type
  */
 @Slf4j
+@SuppressWarnings("PMD.CouplingBetweenObjects") // This main service class needs these objects
 public class ProtocolService<T> implements ConsensusProtocolService<T> {
 
     /** The ID of the local player (i.e., the ID for this local node). */
@@ -103,6 +105,7 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
      * @param blockchainService the blockchain service instance
      * @param peerNetworkClient the peer network client instance
      */
+    @SuppressFBWarnings(value = { "EI_EXPOSE_REP2" }, justification = "You have to set final variables from a constructor.")
     public ProtocolService(final String localPlayerId, final int iterationNumber, final PlayerService playerService, final DigitalSignatureService signatureService,
             final BlockchainService<T> blockchainService, final PeerNetworkClient peerNetworkClient) {
         this(localPlayerId, iterationNumber, playerService, signatureService, new ProposalService<>(localPlayerId, signatureService, peerNetworkClient),
@@ -123,6 +126,7 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
      * @param peerNetworkClient the peer network client instance
      * @param iterationService the iteration service instance
      */
+    @SuppressFBWarnings(value = { "EI_EXPOSE_REP2" }, justification = "You have to set final variables from a constructor.")
     public ProtocolService(final String localPlayerId, final int iterationNumber, final PlayerService playerService, final DigitalSignatureService signatureService,
             final ProposalService<T> proposalService, final VotingService<T> votingService, final BlockchainService<T> blockchainService, final PeerNetworkClient peerNetworkClient,
             final IterationService iterationService) {
