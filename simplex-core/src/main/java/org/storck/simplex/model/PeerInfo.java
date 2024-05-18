@@ -43,12 +43,8 @@ public record PeerInfo(String peerId, byte[] publicKeyBytes) {
     @Override
     public boolean equals(final Object other) {
         boolean result = this == other;
-        if (!result) {
-            result = other != null && getClass() == other.getClass();
-            if (result) {
-                PeerInfo peerInfo = (PeerInfo) other;
-                result = peerId().equals(peerInfo.peerId()) && Arrays.equals(publicKeyBytes, peerInfo.publicKeyBytes);
-            }
+        if (!result && other instanceof PeerInfo peerInfo) {
+            result = peerId().equals(peerInfo.peerId()) && Arrays.equals(publicKeyBytes, peerInfo.publicKeyBytes);
         }
         return result;
     }

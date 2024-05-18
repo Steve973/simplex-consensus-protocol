@@ -45,13 +45,8 @@ public record SignedProposal<T>(Proposal<T> proposal, byte[] signature) {
     @Override
     public boolean equals(final Object other) {
         boolean result = this == other;
-        if (!result) {
-            result = other != null && getClass() == other.getClass();
-            if (result) {
-                @SuppressWarnings("unchecked")
-                SignedProposal<T> peerInfo = (SignedProposal<T>) other;
-                result = proposal().equals(peerInfo.proposal()) && Arrays.equals(signature, peerInfo.signature);
-            }
+        if (!result && other instanceof SignedProposal<?> peerInfo) {
+            result = proposal().equals(peerInfo.proposal()) && Arrays.equals(signature, peerInfo.signature);
         }
         return result;
     }

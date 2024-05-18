@@ -46,12 +46,8 @@ public record SignedVote(Vote vote, byte[] signature) {
     @Override
     public boolean equals(final Object other) {
         boolean result = this == other;
-        if (!result) {
-            result = other != null && getClass() == other.getClass();
-            if (result) {
-                SignedVote vote = (SignedVote) other;
-                result = vote().equals(vote.vote()) && Arrays.equals(signature, vote.signature);
-            }
+        if (!result && other instanceof SignedVote signedVote) {
+            result = vote().equals(signedVote.vote()) && Arrays.equals(signature, signedVote.signature);
         }
         return result;
     }

@@ -50,13 +50,11 @@ public record ProposalProtocolMessage(byte[] content) implements ProtocolMessage
      */
     @Override
     public boolean equals(final Object other) {
-        boolean result = this == other;
-        if (!result) {
-            result = other != null && getClass() == other.getClass();
-            if (result) {
-                ProposalProtocolMessage msg = (ProposalProtocolMessage) other;
-                result = getType().equals(msg.getType()) && Arrays.equals(content, msg.content);
-            }
+        boolean result = false;
+        if (this == other) {
+            result = true;
+        } else if (other instanceof ProposalProtocolMessage that) {
+            result = Arrays.equals(content, that.content) && getType().equals(that.getType());
         }
         return result;
     }
