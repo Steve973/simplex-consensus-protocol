@@ -1,9 +1,16 @@
 package org.storck.simplex.networking.api.protocol
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 
+/**
+ * This class contains the test cases for the [VoteProtocolMessage] class.
+ */
+@SuppressFBWarnings(
+    value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "SE_BAD_FIELD_STORE", "EC_UNRELATED_TYPES", "EC_NULL_ARG"],
+    justification = "I cannot find anything wrong with the test.")
 class VoteProtocolMessageTest : ShouldSpec({
 
     context("content function") {
