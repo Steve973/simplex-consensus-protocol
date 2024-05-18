@@ -1,6 +1,7 @@
 package org.storck.simplex.service
 
 import com.fasterxml.jackson.core.type.TypeReference
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -23,6 +24,9 @@ import java.security.PublicKey
 /**
  * Test the Blockchain Service.
  */
+@SuppressFBWarnings(
+    value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "NP_NULL_ON_SOME_PATH", "RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT"],
+    justification = "I cannot find anything wrong with the test, and mock objects used in a test do not need to be serializable.")
 class ProtocolServiceTest : BehaviorSpec({
     val details = "details"
     val peerId = "peerId"

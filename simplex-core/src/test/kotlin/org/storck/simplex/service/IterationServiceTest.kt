@@ -1,5 +1,6 @@
 package org.storck.simplex.service
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.core.spec.style.BehaviorSpec
@@ -13,6 +14,10 @@ import org.storck.simplex.networking.api.network.PeerNetworkClient
 /**
  * Test the Blockchain Service.
  */
+@OptIn(DelicateCoroutinesApi::class)
+@SuppressFBWarnings(
+    value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "NP_NULL_ON_SOME_PATH"],
+    justification = "I cannot find anything wrong with the test, and mock objects used in a test do not need to be serializable.")
 class IterationServiceTest: BehaviorSpec({
     val localPlayerId = "testPlayer"
     val iterationNumber = 1
