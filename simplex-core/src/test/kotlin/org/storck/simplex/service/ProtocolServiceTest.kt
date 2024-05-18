@@ -1,15 +1,14 @@
 package org.storck.simplex.service
 
 import com.fasterxml.jackson.core.type.TypeReference
-import edu.umd.cs.findbugs.annotations.CheckReturnValue
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.*
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import io.mockk.MockKAnnotations.init
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.storck.simplex.model.*
@@ -26,7 +25,6 @@ import java.security.PublicKey
 /**
  * Test the Blockchain Service.
  */
-@OptIn(DelicateCoroutinesApi::class)
 @SuppressFBWarnings(
     value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "NP_NULL_ON_SOME_PATH", "RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT"],
     justification = "I cannot find anything wrong with the test, and mock objects used in a test do not need to be serializable.")
@@ -43,7 +41,15 @@ class ProtocolServiceTest : BehaviorSpec({
     mockkStatic(MessageUtils::class)
     mockkStatic(DigitalSignatureService::class)
 
-    afterTest {
+    lateinit var protocolService: ProtocolService<String>
+
+    beforeEach {
+        protocolService = ProtocolService(
+            localPlayerId, iterationNumber, playerService, signatureService, proposalService,
+            votingService, blockchainService, peerNetworkClient, iterationService)
+    }
+
+    afterEach {
         clearAllMocks()
     }
 
@@ -59,8 +65,6 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("a peer connected message") {
-        val protocolService = ProtocolService(localPlayerId, iterationNumber, playerService, signatureService, proposalService,
-            votingService, blockchainService, peerNetworkClient, iterationService)
         val peerId = "peerId"
         val publicKeyBytes = byteArrayOf(0x01, 0x02, 0x03)
         val details = "details"
@@ -85,8 +89,6 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("a peer disconnected message") {
-        val protocolService = ProtocolService(localPlayerId, iterationNumber, playerService, signatureService, proposalService,
-            votingService, blockchainService, peerNetworkClient, iterationService)
         val peerId = "peerId"
         val publicKeyEncoded = "publicKeyEncoded"
         val publicKeyBytes = publicKeyEncoded.toByteArray()
@@ -108,6 +110,16 @@ class ProtocolServiceTest : BehaviorSpec({
                 verify(exactly = 1) { playerService.removePlayer(peerId) }
             }
         }
+    }
+
+    Given("a message from an unknown peer") {
+        val peerId = "peerId"
+        val publicKeyEncoded = "publicKeyEncoded"
+        val publicKeyBytes = publicKeyEncoded.toByteArray()
+        val details = "details"
+        val mockPeerInfo = mockk<PeerInfo>()
+        val mockPublicKey = mockk<PublicKey>()
+        val message = NetworkEventMessage(NetworkEvent.PEER_DISCONNECTED, details)
 
         When("NetworkMessageType is NETWORK_EVENT and NetworkEvent is PEER_DISCONNECTED, but peerId is unknown") {
             every { mockPublicKey.encoded } returns publicKeyEncoded.toByteArray()
@@ -125,8 +137,6 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("an unexpected message type") {
-        val protocolService = ProtocolService(localPlayerId, iterationNumber, playerService, signatureService, proposalService,
-            votingService, blockchainService, peerNetworkClient, iterationService)
         val message = NetworkEventMessage(NetworkEvent.OTHER, "unexpected message")
 
         When("a message with a null message type is processed") {
@@ -141,8 +151,6 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("a null message type") {
-        val protocolService = ProtocolService(localPlayerId, iterationNumber, playerService, signatureService, proposalService,
-            votingService, blockchainService, peerNetworkClient, iterationService)
         val message = mockk<NetworkEventMessage>()
 
         When("a message with a null message type is processed") {
@@ -157,8 +165,6 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("a vote message") {
-        val protocolService = ProtocolService(localPlayerId, iterationNumber, playerService, signatureService, proposalService,
-            votingService, blockchainService, peerNetworkClient, iterationService)
         val voteMessage = mockk<VoteProtocolMessage>()
         val voteContentBytes = byteArrayOf(0x01, 0x02, 0x03)
         val signedVote = mockk<SignedVote>()
@@ -176,6 +182,12 @@ class ProtocolServiceTest : BehaviorSpec({
                 verify(exactly = 0) { iterationService.stopIteration() }
             }
         }
+    }
+
+    Given("a vote that has a quorum reached") {
+        val voteMessage = mockk<VoteProtocolMessage>()
+        val voteContentBytes = byteArrayOf(0x01, 0x02, 0x03)
+        val signedVote = mockk<SignedVote>()
 
         When("a Vote message is processed with quorum reached") {
             every { voteMessage.type } returns ProtocolMessageType.VOTE_MESSAGE
@@ -194,8 +206,6 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("a proposal message for processing") {
-        val protocolService = ProtocolService(localPlayerId, iterationNumber, playerService, signatureService, proposalService,
-            votingService, blockchainService, peerNetworkClient, iterationService)
         val proposalMessage = mockk<ProposalProtocolMessage>()
         val proposalContentBytes = byteArrayOf(0x01, 0x02, 0x03)
         val signedProposal = mockk<SignedProposal<String>>()
@@ -234,6 +244,16 @@ class ProtocolServiceTest : BehaviorSpec({
                 verify(exactly = 1) { peerNetworkClient.broadcastVote(any()) }
             }
         }
+    }
+
+    Given("an invalid proposal message for processing") {
+        val proposalMessage = mockk<ProposalProtocolMessage>()
+        val proposalContentBytes = byteArrayOf(0x01, 0x02, 0x03)
+        val signedProposal = mockk<SignedProposal<String>>()
+        val proposal = mockk<Proposal<String>>()
+        val block1 = mockk<NotarizedBlock<String>>()
+        val block2 = mockk<NotarizedBlock<String>>()
+        val notarizedBlockchain = mockk<NotarizedBlockchain<String>>()
 
         When("an invalid Proposal message is processed") {
             every { proposalMessage.type } returns ProtocolMessageType.PROPOSAL_MESSAGE
@@ -249,6 +269,7 @@ class ProtocolServiceTest : BehaviorSpec({
                     any<List<NotarizedBlock<String>>>()
                 )
             } returns false
+            every { iterationService.stopIteration() } just Runs
 
             protocolService.processProtocolMessage(proposalMessage)
 
@@ -259,8 +280,6 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("a finalize message for processing") {
-        val protocolService = ProtocolService(localPlayerId, iterationNumber, playerService, signatureService, proposalService,
-            votingService, blockchainService, peerNetworkClient, iterationService)
         val finalizeMessage = FinalizeProtocolMessage(iterationNumber)
 
         When("a Finalize message is processed") {
@@ -273,8 +292,6 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("an unexpected message for processing") {
-        val protocolService = ProtocolService(localPlayerId, iterationNumber, playerService, signatureService, proposalService,
-            votingService, blockchainService, peerNetworkClient, iterationService)
         val message = ProtocolMessage { ProtocolMessageType.OTHER }
 
         When("an unexpected message is processed") {
@@ -288,8 +305,6 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("transactions to process") {
-        val protocolService = ProtocolService(localPlayerId, iterationNumber, playerService, signatureService, proposalService,
-            votingService, blockchainService, peerNetworkClient, iterationService)
 
         // Test for processTransactions method
         When("processTransactions is called") {
@@ -307,8 +322,6 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("a blockchain from a future iteration to sync with") {
-        val protocolService = ProtocolService(localPlayerId, iterationNumber, playerService, signatureService, proposalService,
-            votingService, blockchainService, peerNetworkClient, iterationService)
         val block1 = mockk<NotarizedBlock<String>>()
         val block2 = mockk<NotarizedBlock<String>>()
         val notarizedBlockchain = mockk<NotarizedBlockchain<String>>()
@@ -326,7 +339,7 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("a check of block size to make sure we are in the correct iteration number") {
-        val protocolService = ProtocolService(localPlayerId, 3, playerService, signatureService, proposalService,
+        val svc = ProtocolService("test", 5, playerService, signatureService, proposalService,
             votingService, blockchainService, peerNetworkClient, iterationService)
         val block1 = mockk<NotarizedBlock<String>>()
         val block2 = mockk<NotarizedBlock<String>>()
@@ -334,9 +347,8 @@ class ProtocolServiceTest : BehaviorSpec({
 
         When("synchronizeIterationNumber is called with blockchain for iteration, but not to exceed iteration") {
             every { notarizedBlockchain.blocks() } answers { listOf(block1, block2) }
-            every { iterationService.stopIteration() } just Runs
 
-            protocolService.synchronizeIterationNumber(notarizedBlockchain)
+            svc.synchronizeIterationNumber(notarizedBlockchain)
 
             Then("nothing happens because the number of blocks is not greater than the iteration number") {
                 verify(exactly = 0) { iterationService.stopIteration() }
@@ -345,8 +357,7 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("a service to start and stop") {
-        val protocolService = ProtocolService(localPlayerId, iterationNumber, playerService, signatureService, proposalService,
-            votingService, blockchainService, peerNetworkClient, iterationService)
+        val coroutineScope = CoroutineScope(Dispatchers.Default)
 
         When("start method is called and then stopped") {
             every { iterationService.leaderId } returns "leaderId"
@@ -356,7 +367,7 @@ class ProtocolServiceTest : BehaviorSpec({
             every { proposalService.proposeNewBlock(any<List<NotarizedBlock<String>>>(), any<Int>()) } just Runs
 
             // starting protocol service in a separate coroutine because it has a blocking loop
-            val job = GlobalScope.launch {
+            val job = coroutineScope.launch {
                 protocolService.start()
             }
             delay(100)
@@ -372,8 +383,7 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("an iteration to start where the player is the leader") {
-        val protocolService = ProtocolService(localPlayerId, iterationNumber, playerService, signatureService, proposalService,
-            votingService, blockchainService, peerNetworkClient, iterationService)
+        val coroutineScope = CoroutineScope(Dispatchers.Default)
         val block1 = mockk<NotarizedBlock<String>>()
         val block2 = mockk<NotarizedBlock<String>>()
 
@@ -386,10 +396,10 @@ class ProtocolServiceTest : BehaviorSpec({
             every { proposalService.proposeNewBlock(any<List<NotarizedBlock<String>>>(), any<Int>()) } just Runs
 
             // starting protocol service in a separate coroutine because it has a blocking loop
-            val job = GlobalScope.launch {
+            val job = coroutineScope.launch {
                 protocolService.start()
             }
-            delay(10)
+            delay(100)
             protocolService.stop()
             job.join()
 
@@ -400,14 +410,15 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("a running service to stop") {
-        val protocolService = ProtocolService(localPlayerId, iterationNumber, playerService, signatureService, proposalService,
+        val svc = ProtocolService(
+            "someUser", 5, playerService, signatureService, proposalService,
             votingService, blockchainService, peerNetworkClient, iterationService)
 
         When("stop method is called") {
-            protocolService.stop()
+            svc.stop()
 
             Then("it should set shutdown flag to true") {
-                protocolService.isShutdown shouldBe true
+                svc.isShutdown shouldBe true
             }
         }
     }
