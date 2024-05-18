@@ -29,10 +29,6 @@ dependencies {
     annotationProcessor(libs.lombok)
     testCompileOnly(libs.lombok)
     testAnnotationProcessor(libs.lombok)
-    compileOnly(libs.spotbugs.annotations)
-    annotationProcessor(libs.spotbugs.annotations)
-    testCompileOnly(libs.spotbugs.annotations)
-    testAnnotationProcessor(libs.spotbugs.annotations)
     testImplementation(libs.bundles.kotest)
 }
 

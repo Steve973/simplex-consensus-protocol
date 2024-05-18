@@ -1,6 +1,5 @@
 package org.storck.simplex.service;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.storck.simplex.model.Proposal;
@@ -61,7 +60,6 @@ public class VotingService<T> {
      * @param signatureService the service that handles digital signature operations
      * @param playerService the service that manages players and their public keys
      */
-    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "The player service state is meant to change as players arrive and depart.")
     public VotingService(final DigitalSignatureService signatureService, final PlayerService playerService) {
         this.votes = new ArrayList<>();
         this.signatureService = signatureService;

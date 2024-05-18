@@ -1,6 +1,5 @@
 package org.storck.simplex.service
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
@@ -8,15 +7,11 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.mockk.mockk
 import org.storck.simplex.model.Block
 import java.security.KeyPair
-import java.security.NoSuchAlgorithmException
 import java.security.PublicKey
 
 /**
  * This class contains unit tests for the DigitalSignatureService class.
  */
-@SuppressFBWarnings(
-    value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "SE_BAD_FIELD_STORE"],
-    justification = "I cannot find anything wrong with the test.")
 class DigitalSignatureServiceTest : BehaviorSpec({
 
     val signatureService = DigitalSignatureService()
