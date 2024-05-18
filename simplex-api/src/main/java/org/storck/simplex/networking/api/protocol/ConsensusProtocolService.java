@@ -41,8 +41,11 @@ public interface ConsensusProtocolService<T> {
     /**
      * When the network is ready, it notifies the service to start participating in
      * the protocol through this method.
+     *
+     * @throws InterruptedException if interrupted while awaiting completion from
+     *     the iteration service
      */
-    void start();
+    void start() throws InterruptedException;
 
     /**
      * Stops the protocol.

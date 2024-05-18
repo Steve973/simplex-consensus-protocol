@@ -341,7 +341,7 @@ class ProtocolServiceTest : BehaviorSpec({
 
         When("start method is called and then stopped") {
             every { iterationService.leaderId } returns "leaderId"
-            every { iterationService.initializeForIteration(any<Int>()) } just Runs
+            every { iterationService.initializeForIteration(any<Int>(), any()) } just Runs
             every { iterationService.startIteration() } just Runs
             every { iterationService.awaitCompletion() } just Runs
             every { proposalService.proposeNewBlock(any<List<NotarizedBlock<String>>>(), any<Int>()) } just Runs
@@ -355,7 +355,7 @@ class ProtocolServiceTest : BehaviorSpec({
             job.join()
 
             Then("the protocol runs its iterations until shut down") {
-                verify(atLeast = 1) { iterationService.initializeForIteration(any()) }
+                verify(atLeast = 1) { iterationService.initializeForIteration(any(), any()) }
                 verify(atLeast = 1) { iterationService.startIteration() }
                 verify(atLeast = 1) { iterationService.awaitCompletion() }
             }
@@ -368,7 +368,7 @@ class ProtocolServiceTest : BehaviorSpec({
         When("start method is called when local player is the iteration leader") {
             every { blockchainService.blockchain } returns listOf(block1, block2)
             every { iterationService.leaderId } returns localPlayerId
-            every { iterationService.initializeForIteration(any<Int>()) } just Runs
+            every { iterationService.initializeForIteration(any<Int>(), any()) } just Runs
             every { iterationService.startIteration() } just Runs
             every { iterationService.awaitCompletion() } just Runs
             every { proposalService.proposeNewBlock(any<List<NotarizedBlock<String>>>(), any<Int>()) } just Runs
