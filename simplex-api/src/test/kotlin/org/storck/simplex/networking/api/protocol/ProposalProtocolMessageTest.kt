@@ -1,9 +1,16 @@
 package org.storck.simplex.networking.api.protocol
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 
+/**
+ * This class contains unit tests for the ProposalProtocolMessage class.
+ */
+@SuppressFBWarnings(
+    value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "SE_BAD_FIELD_STORE", "EC_UNRELATED_TYPES", "EC_NULL_ARG"],
+    justification = "I cannot find anything wrong with the test.")
 class ProposalProtocolMessageTest : ShouldSpec({
     val content1 = byteArrayOf(1, 2, 3)
     val content2 = byteArrayOf(4, 5, 6)
