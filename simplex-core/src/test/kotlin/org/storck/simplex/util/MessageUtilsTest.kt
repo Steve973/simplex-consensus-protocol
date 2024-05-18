@@ -3,10 +3,8 @@ package org.storck.simplex.util
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.json.JsonMapper
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
-import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.throwable.shouldHaveMessage
 import io.kotest.matchers.types.shouldBeTypeOf
@@ -16,9 +14,6 @@ import java.security.KeyPairGenerator
 /**
  * Class used for testing the MessageUtils class.
  */
-@SuppressFBWarnings(
-    value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD"],
-    justification = "I cannot find anything wrong with the test.")
 class MessageUtilsTest : BehaviorSpec({
 
     val jsonMapper = JsonMapper(JsonFactory())
@@ -112,9 +107,6 @@ class MessageUtilsTest : BehaviorSpec({
  * Class for an instance that should case an error with jackson serialization.
  */
 @Suppress("UNNECESSARY_LATEINIT")
-@SuppressFBWarnings(
-    value = ["NP_NONNULL_RETURN_VIOLATION"],
-    justification = "This is supposed to be incorrect to make the test fail.")
 class CircularReferenceObject(val name: String) {
 
     /**

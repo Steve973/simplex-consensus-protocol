@@ -3,7 +3,6 @@ package org.storck.simplex.service;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.storck.simplex.model.Block;
@@ -81,7 +80,6 @@ public class DigitalSignatureService {
      * Create an instance with the default algorithm names. A keypair will be
      * generated.
      */
-    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "If the keypair cannot be generated, this node cannot run anyway")
     public DigitalSignatureService() {
         this(MESSAGE_DIGEST_ALGORITHM, KEYPAIR_GENERATOR_ALGORITHM, SIGNATURE_ALGORITHM);
     }
@@ -94,7 +92,6 @@ public class DigitalSignatureService {
      * @param keypairGeneratorAlgorithm The algorithm used for generating key pairs.
      * @param signatureAlgorithm The algorithm used for generating signatures.
      */
-    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "If the keypair cannot be generated, this node cannot run anyway")
     public DigitalSignatureService(final String messageDigestAlgorithm, final String keypairGeneratorAlgorithm, final String signatureAlgorithm) {
         this.messageDigestAlgorithm = messageDigestAlgorithm;
         this.keypairGeneratorAlgorithm = keypairGeneratorAlgorithm;
