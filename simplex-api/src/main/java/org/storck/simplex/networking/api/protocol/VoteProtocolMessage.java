@@ -50,14 +50,11 @@ public record VoteProtocolMessage(byte[] content) implements ProtocolMessage {
      */
     @Override
     public boolean equals(final Object other) {
-        boolean result = this == other;
-        if (!result) {
-            result = other != null && getClass() == other.getClass();
-
-            if (result) {
-                VoteProtocolMessage msg = (VoteProtocolMessage) other;
-                result = getType().equals(msg.getType()) && Arrays.equals(content, msg.content);
-            }
+        boolean result = false;
+        if (this == other) {
+            result = true;
+        } else if (other instanceof VoteProtocolMessage that) {
+            result = getType().equals(that.getType()) && Arrays.equals(content, that.content);
         }
         return result;
     }
