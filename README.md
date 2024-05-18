@@ -4,7 +4,14 @@
 
 Quality and Security Metrics
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4b9194bffb2c42f9902b05c1e8961dd1)](https://app.codacy.com/gh/Steve973/simplex-consensus-protocol/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Steve973_simplex-consensus-protocol&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Steve973_simplex-consensus-protocol)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Steve973_simplex-consensus-protocol&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Steve973_simplex-consensus-protocol)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Steve973_simplex-consensus-protocol&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=Steve973_simplex-consensus-protocol)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Steve973_simplex-consensus-protocol&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Steve973_simplex-consensus-protocol)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Steve973_simplex-consensus-protocol&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Steve973_simplex-consensus-protocol)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Steve973_simplex-consensus-protocol&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Steve973_simplex-consensus-protocol)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Steve973_simplex-consensus-protocol&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Steve973_simplex-consensus-protocol)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Steve973_simplex-consensus-protocol&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=Steve973_simplex-consensus-protocol)
 [![Dependabot Status](https://badgen.net/github/dependabot/Steve973/simplex-consensus-protocol?icon=github)](https://github.com/Steve973/simplex-consensus-protocol/security/dependabot)
 
 Activity
