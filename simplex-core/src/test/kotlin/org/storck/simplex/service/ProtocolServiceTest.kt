@@ -39,12 +39,12 @@ class ProtocolServiceTest : BehaviorSpec({
     val blockchainService = mockk<BlockchainService<String>>()
     val peerNetworkClient = mockk<PeerNetworkClient>()
     val iterationService = mockk<IterationService>()
-    val block1 = mockk<NotarizedBlock<String>>()
-    val block2 = mockk<NotarizedBlock<String>>()
-    val notarizedBlockchain = mockk<NotarizedBlockchain<String>>()
+    val block1 = mockk<BlockNotarized<String>>()
+    val block2 = mockk<BlockNotarized<String>>()
+    val notarizedBlockchain = mockk<BlockchainNotarized<String>>()
     val mockPeerInfo = mockk<PeerInfo>()
     val mockPublicKey = mockk<PublicKey>()
-    val signedVote = mockk<SignedVote>()
+    val signedVote = mockk<VoteSigned>()
     mockkStatic(MessageUtils::class)
     mockkStatic(DigitalSignatureService::class)
 
@@ -167,7 +167,7 @@ class ProtocolServiceTest : BehaviorSpec({
             every { voteMessage.type } returns ProtocolMessageType.VOTE_MESSAGE
             every { voteMessage.content } returns voteContentBytes
             every { MessageUtils.fromBytes(any<ByteArray>(), any<TypeReference<Any>>()) } returns signedVote
-            every { votingService.processVote(any<SignedVote>()) } returns false
+            every { votingService.processVote(any<VoteSigned>()) } returns false
 
             protocolService.processProtocolMessage(voteMessage)
 
@@ -186,7 +186,7 @@ class ProtocolServiceTest : BehaviorSpec({
             every { voteMessage.type } returns ProtocolMessageType.VOTE_MESSAGE
             every { voteMessage.content } returns voteContentBytes
             every { MessageUtils.fromBytes(any<ByteArray>(), any<TypeReference<Any>>()) } returns signedVote
-            every { votingService.processVote(any<SignedVote>()) } returns true
+            every { votingService.processVote(any<VoteSigned>()) } returns true
             every { iterationService.stopIteration() } just Runs
 
             protocolService.processProtocolMessage(voteMessage)
@@ -201,7 +201,7 @@ class ProtocolServiceTest : BehaviorSpec({
     Given("a proposal message for processing") {
         val proposalMessage = mockk<ProposalProtocolMessage>()
         val proposalContentBytes = byteArrayOf(0x01, 0x02, 0x03)
-        val signedProposal = mockk<SignedProposal<String>>()
+        val signedProposal = mockk<ProposalSigned<String>>()
         val proposal = mockk<Proposal<String>>()
 
         When("a Proposal message is processed") {
@@ -215,8 +215,8 @@ class ProtocolServiceTest : BehaviorSpec({
             every { blockchainService.blockchain } returns listOf(block1, block2)
             every {
                 proposalService.processProposal(
-                    any<SignedProposal<String>>(),
-                    any<List<NotarizedBlock<String>>>()
+                    any<ProposalSigned<String>>(),
+                    any<List<BlockNotarized<String>>>()
                 )
             } returns true
             every { votingService.initializeForIteration(any<Int>(), any<Proposal<String>>()) } just Runs
@@ -238,7 +238,7 @@ class ProtocolServiceTest : BehaviorSpec({
     Given("an invalid proposal message for processing") {
         val proposalMessage = mockk<ProposalProtocolMessage>()
         val proposalContentBytes = byteArrayOf(0x01, 0x02, 0x03)
-        val signedProposal = mockk<SignedProposal<String>>()
+        val signedProposal = mockk<ProposalSigned<String>>()
         val proposal = mockk<Proposal<String>>()
 
         When("an invalid Proposal message is processed") {
@@ -251,8 +251,8 @@ class ProtocolServiceTest : BehaviorSpec({
             every { blockchainService.blockchain } returns listOf(block1, block2)
             every {
                 proposalService.processProposal(
-                    any<SignedProposal<String>>(),
-                    any<List<NotarizedBlock<String>>>()
+                    any<ProposalSigned<String>>(),
+                    any<List<BlockNotarized<String>>>()
                 )
             } returns false
             every { iterationService.stopIteration() } just Runs
@@ -265,14 +265,28 @@ class ProtocolServiceTest : BehaviorSpec({
         }
     }
 
-    Given("a finalize message for processing") {
-        val finalizeMessage = FinalizeProtocolMessage(iterationNumber)
+    Given("a finalizeMsg message for processing") {
+        val finalizeContentBytes = byteArrayOf(0x01, 0x02, 0x03)
+        val finalizeMessage = mockk<FinalizeProtocolMessage>()
+        val signedFinalize = mockk<FinalizeSigned>()
+        val finalize = mockk<Finalize>()
+        val playerPubKey = mockk<PublicKey>()
 
         When("a Finalize message is processed") {
-            // TODO: The behavior for FINALIZE_MESSAGE case is not implemented yet, so we need to update this test once it is.
+            every { finalizeMessage.type } returns ProtocolMessageType.FINALIZE_MESSAGE
+            every { finalizeMessage.content } returns finalizeContentBytes
+            every { MessageUtils.fromBytes(any<ByteArray>(), any<TypeReference<Any>>()) } returns signedFinalize
+            every { signedFinalize.finalizeMsg } returns finalize
+            every { signedFinalize.signature } returns finalizeContentBytes
+            every { playerService.getPublicKey(any()) } returns playerPubKey
+            every { signatureService.verifySignature(any(), any(), any()) } returns true
+            every { finalize.playerId } returns "otherPlayerId"
+            every { finalize.iteration } returns iterationNumber
+
             protocolService.processProtocolMessage(finalizeMessage)
 
             Then("Something evaluated here") {
+                // TODO: The behavior for FINALIZE_MESSAGE case is not finished yet, so update this later!
             }
         }
     }
@@ -313,7 +327,7 @@ class ProtocolServiceTest : BehaviorSpec({
             every { notarizedBlockchain.blocks() } answers { listOf(block1, block2) }
             every { iterationService.stopIteration() } just Runs
 
-            protocolService.synchronizeIterationNumber(notarizedBlockchain)
+            protocolService.processNotarizedBlockchain(notarizedBlockchain)
 
             Then("it synchronizes iteration number based on the size of the notarized blockchain") {
                 verify { iterationService.stopIteration() }
@@ -328,7 +342,7 @@ class ProtocolServiceTest : BehaviorSpec({
         When("synchronizeIterationNumber is called with blockchain for iteration, but not to exceed iteration") {
             every { notarizedBlockchain.blocks() } answers { listOf(block1, block2) }
 
-            svc.synchronizeIterationNumber(notarizedBlockchain)
+            svc.processNotarizedBlockchain(notarizedBlockchain)
 
             Then("nothing happens because the number of blocks is not greater than the iteration number") {
                 verify(exactly = 0) { iterationService.stopIteration() }
@@ -344,7 +358,7 @@ class ProtocolServiceTest : BehaviorSpec({
             every { iterationService.initializeForIteration(any<Int>(), any()) } just Runs
             every { iterationService.startIteration() } just Runs
             every { iterationService.awaitCompletion() } just Runs
-            every { proposalService.proposeNewBlock(any<List<NotarizedBlock<String>>>(), any<Int>()) } just Runs
+            every { proposalService.proposeNewBlock(any<List<BlockNotarized<String>>>(), any<Int>()) } just Runs
 
             // starting protocol service in a separate coroutine because it has a blocking loop
             val job = coroutineScope.launch {
@@ -371,7 +385,7 @@ class ProtocolServiceTest : BehaviorSpec({
             every { iterationService.initializeForIteration(any<Int>(), any()) } just Runs
             every { iterationService.startIteration() } just Runs
             every { iterationService.awaitCompletion() } just Runs
-            every { proposalService.proposeNewBlock(any<List<NotarizedBlock<String>>>(), any<Int>()) } just Runs
+            every { proposalService.proposeNewBlock(any<List<BlockNotarized<String>>>(), any<Int>()) } just Runs
 
             // starting protocol service in a separate coroutine because it has a blocking loop
             val job = coroutineScope.launch {
@@ -382,7 +396,7 @@ class ProtocolServiceTest : BehaviorSpec({
             job.join()
 
             Then("as the leader, the proposal service should be called to propose a new block") {
-                verify(atLeast = 1) { proposalService.proposeNewBlock(any<List<NotarizedBlock<String>>>(), any<Int>()) }
+                verify(atLeast = 1) { proposalService.proposeNewBlock(any<List<BlockNotarized<String>>>(), any<Int>()) }
             }
         }
     }

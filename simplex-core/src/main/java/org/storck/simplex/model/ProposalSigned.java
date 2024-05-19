@@ -11,7 +11,7 @@ import java.util.Objects;
  * @param proposal the {@link Proposal}
  * @param signature the signature for proposal verification
  */
-public record SignedProposal<T>(Proposal<T> proposal, byte[] signature) {
+public record ProposalSigned<T>(Proposal<T> proposal, byte[] signature) {
 
     /**
      * Create an instance with the proposal and signature.
@@ -19,7 +19,7 @@ public record SignedProposal<T>(Proposal<T> proposal, byte[] signature) {
      * @param proposal the proposal
      * @param signature the signature
      */
-    public SignedProposal {
+    public ProposalSigned {
         Objects.requireNonNull(proposal);
         Objects.requireNonNull(signature);
         signature = signature.clone();
@@ -45,8 +45,8 @@ public record SignedProposal<T>(Proposal<T> proposal, byte[] signature) {
     @Override
     public boolean equals(final Object other) {
         boolean result = this == other;
-        if (!result && other instanceof SignedProposal<?> peerInfo) {
-            result = proposal().equals(peerInfo.proposal()) && Arrays.equals(signature, peerInfo.signature);
+        if (!result && other instanceof ProposalSigned<?> signedProposal) {
+            result = proposal().equals(signedProposal.proposal()) && Arrays.equals(signature, signedProposal.signature);
         }
         return result;
     }
@@ -71,7 +71,7 @@ public record SignedProposal<T>(Proposal<T> proposal, byte[] signature) {
      */
     @Override
     public String toString() {
-        return "SignedProposal{"
+        return "ProposalSigned{"
                 + "proposal=" + proposal()
                 + ", signature=" + Arrays.toString(signature)
                 + '}';

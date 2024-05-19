@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import org.storck.simplex.model.Block
-import org.storck.simplex.model.NotarizedBlock
+import org.storck.simplex.model.BlockNotarized
 
 /**
  * Test the Blockchain Service.
@@ -19,7 +19,7 @@ class BlockchainServiceTest : BehaviorSpec({
     given("A BlockchainService") {
         val blockchainService = BlockchainService<String>()
         val dummyBlock = mockk<Block<String>>()
-        val dummyNotarizedBlock = mockk<NotarizedBlock<String>>()
+        val dummyNotarizedBlock = mockk<BlockNotarized<String>>()
 
         every { dummyBlock.height } returns 0
         every { dummyBlock.parentHash } returns ""
@@ -45,9 +45,9 @@ class BlockchainServiceTest : BehaviorSpec({
             }
         }
 
-        `when`("creating a finalize block") {
+        `when`("creating a finalizeMsg block") {
             val finalizeBlock = blockchainService.createFinalizeBlock.apply(0)
-            then("it should match the finalize block") {
+            then("it should match the finalizeMsg block") {
                 finalizeBlock.height shouldBe 0
                 finalizeBlock.parentHash shouldBe "FINALIZE"
                 finalizeBlock.transactions shouldBe emptyList()

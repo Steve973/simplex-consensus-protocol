@@ -3,6 +3,7 @@ package org.storck.simplex.service
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.*
@@ -103,6 +104,18 @@ class IterationServiceTest : BehaviorSpec({
 
             Then("exception should have been thrown") {
                 exception shouldNotBe null
+            }
+        }
+    }
+
+    Given("received finalize message") {
+        val iterationService = IterationService(localPlayerId, playerService, digitalSignatureService, peerNetworkClient)
+
+        When("log that payer sent finalize message") {
+            iterationService.logFinalizeReceipt(localPlayerId)
+
+            Then("receipts should contain the playerId that sent the finalize message") {
+                iterationService.finalizeReceipts shouldContain localPlayerId
             }
         }
     }

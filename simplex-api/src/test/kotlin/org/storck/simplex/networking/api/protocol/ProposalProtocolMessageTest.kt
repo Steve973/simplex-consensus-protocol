@@ -40,7 +40,7 @@ class ProposalProtocolMessageTest : ShouldSpec({
 
         should("return false for different types") {
             val message1 = ProposalProtocolMessage(content1)
-            val message2 = FinalizeProtocolMessage(1)
+            val message2 = FinalizeProtocolMessage(content1)
             (message1.equals(message2)) shouldBe false
         }
 
@@ -65,7 +65,7 @@ class ProposalProtocolMessageTest : ShouldSpec({
 
         should("return different hash codes for different types") {
             val message1 = ProposalProtocolMessage(content1)
-            val message2 = FinalizeProtocolMessage(1)
+            val message2 = FinalizeProtocolMessage(content1)
             message1.hashCode() shouldNotBe message2.hashCode()
         }
 

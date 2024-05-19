@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.storck.simplex.model.NotarizedBlockchain;
+import org.storck.simplex.model.BlockchainNotarized;
+import org.storck.simplex.model.Finalize;
+import org.storck.simplex.model.FinalizeSigned;
 import org.storck.simplex.model.PeerInfo;
-import org.storck.simplex.model.SignedProposal;
-import org.storck.simplex.model.SignedVote;
+import org.storck.simplex.model.ProposalSigned;
+import org.storck.simplex.model.VoteSigned;
 import org.storck.simplex.networking.api.message.NetworkMessage;
 import org.storck.simplex.networking.api.message.NetworkMessageType;
 import org.storck.simplex.networking.api.message.ProtocolMessage;
@@ -22,6 +24,7 @@ import org.storck.simplex.networking.api.protocol.VoteProtocolMessage;
 import org.storck.simplex.util.MessageUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Optional;
@@ -189,25 +192,25 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
         switch (messageType) {
             case VOTE_MESSAGE -> {
                 VoteProtocolMessage voteMessage = (VoteProtocolMessage) message;
-                SignedVote signedVote = MessageUtils.fromBytes(voteMessage.content(), new TypeReference<>() {
+                VoteSigned signedVote = MessageUtils.fromBytes(voteMessage.content(), new TypeReference<>() {
                 });
                 if (votingService.processVote(signedVote)) {
-                    // TODO: Quorum was reached, so handle this somehow
+                    // TODO: Quorum was reached, so blockchain is considered notarized -- handle
+                    // this:
+                    // 2/3 player vote means block is notarized, so stop the iteration and process
+                    // the blockchain
                     iterationService.stopIteration();
-                    // Block<T> finalizeBlock =
-                    // blockchainService.createFinalizeBlock.apply(iterationNumber);
-                    // SignedFinalizeBlock signedFinalizeBlock = ???
-                    // peerNetworkClient.broadcastFinalizeBlock(FinalizeProtocolMessage(MessageUtils.tyBytes(signedFinalizeBlock));
+                    // processNotarizedBlockchain(?);
                 }
             }
             case PROPOSAL_MESSAGE -> {
                 ProposalProtocolMessage proposalMessage = (ProposalProtocolMessage) message;
-                SignedProposal<T> signedProposal = MessageUtils.fromBytes(proposalMessage.content(), new TypeReference<>() {
+                ProposalSigned<T> signedProposal = MessageUtils.fromBytes(proposalMessage.content(), new TypeReference<>() {
                 });
-                synchronizeIterationNumber(signedProposal.proposal().parentChain());
+                processNotarizedBlockchain(signedProposal.proposal().parentChain());
                 if (proposalService.processProposal(signedProposal, blockchainService.getBlockchain())) {
                     votingService.initializeForIteration(iterationNumber, signedProposal.proposal());
-                    SignedVote signedVote = votingService.createProposalVote(localPlayerId);
+                    VoteSigned signedVote = votingService.createProposalVote(localPlayerId);
                     peerNetworkClient.broadcastVote(new VoteProtocolMessage(MessageUtils.toBytes(signedVote)));
                 } else {
                     log.warn("Received invalid proposal");
@@ -215,8 +218,24 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
             }
             case FINALIZE_MESSAGE -> {
                 FinalizeProtocolMessage finalizeMessage = (FinalizeProtocolMessage) message;
-                // TODO: handle finalization somehow
-                log.info("Received finalize message for iteration number: {}", finalizeMessage.iterationNumber());
+                FinalizeSigned finalizeSigned = MessageUtils.fromBytes(finalizeMessage.content(), new TypeReference<>() {
+                });
+                Finalize finalizeMsg = finalizeSigned.finalizeMsg();
+                String playerId = finalizeSigned.finalizeMsg().playerId();
+                PublicKey playerPublicKey = playerService.getPublicKey(playerId);
+                boolean finalizeValid;
+                try {
+                    finalizeValid = signatureService.verifySignature(finalizeMessage.content(), finalizeSigned.signature(), playerPublicKey);
+                } catch (GeneralSecurityException e) {
+                    throw new IllegalArgumentException("Received an invalid finalize message", e);
+                }
+                if (finalizeValid) {
+                    log.info("Received finalizeMsg message for iteration number: {}", finalizeMsg.iteration());
+                    // TODO: handle finalization:
+                    // evaluate if the specified iteration number has finalize messages from 2/3
+                    // players
+                    // if so, iteration is finalized, so transactions can be output to the client
+                }
             }
             default -> log.warn("Message type unrecognized: {}", messageType);
         }
@@ -235,14 +254,21 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
 
     /**
      * Synchronizes the iteration number based on the size of the notarized
-     * blockchain that was received.
+     * blockchain that was received. If the notarized blockchain is of the same
+     * length as the current iteration number, then we send a finalize message.
      *
      * @param notarizedBlockchain the notarized blockchain containing the number to
      *     synchronize the iteration number with
      */
-    void synchronizeIterationNumber(final NotarizedBlockchain<T> notarizedBlockchain) {
+    void processNotarizedBlockchain(final BlockchainNotarized<T> notarizedBlockchain) {
         int chainLength = notarizedBlockchain.blocks().size() + 1;
-        if (chainLength > iterationNumber) {
+        if (chainLength == iterationNumber) {
+            // TODO: Move on to next iteration and send finalize message
+            Finalize finalizeMessage = new Finalize(localPlayerId, iterationNumber);
+            FinalizeSigned finalizeSigned = new FinalizeSigned(finalizeMessage, signatureService.generateSignature(MessageUtils.toBytes(finalizeMessage)));
+            FinalizeProtocolMessage finalizeProtocolMessage = new FinalizeProtocolMessage(MessageUtils.toBytes(finalizeSigned));
+            peerNetworkClient.broadcastFinalize(finalizeProtocolMessage);
+        } else if (chainLength > iterationNumber) {
             iterationNumber = chainLength;
             iterationService.stopIteration();
         }

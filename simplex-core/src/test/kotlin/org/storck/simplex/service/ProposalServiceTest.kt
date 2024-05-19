@@ -26,8 +26,8 @@ class ProposalServiceTest : BehaviorSpec({
     val peerNetworkClient = mockk<PeerNetworkClient>()
     val proposal = mockk<Proposal<String>>()
     val newBlock = mockk<Block<String>>()
-    val parentBlock = mockk<NotarizedBlock<String>>()
-    val notarizedBlock = mockk<NotarizedBlock<String>>()
+    val parentBlock = mockk<BlockNotarized<String>>()
+    val notarizedBlock = mockk<BlockNotarized<String>>()
     val notarizedBlocks = listOf(notarizedBlock)
 
     val proposalService = ProposalService<String>(localPlayerId, signatureService, peerNetworkClient)
@@ -229,7 +229,7 @@ class ProposalServiceTest : BehaviorSpec({
 
     given("Process a valid proposal") {
         val iterationNumber = 2
-        val signedProposal = mockk<SignedProposal<String>>()
+        val signedProposal = mockk<ProposalSigned<String>>()
 
         every { proposal.iteration } returns iterationNumber
         every { proposal.parentChain.blocks } returns notarizedBlocks
@@ -252,7 +252,7 @@ class ProposalServiceTest : BehaviorSpec({
 
     given("Process an invalid proposal") {
         val iterationNumber = 2
-        val signedProposal = mockk<SignedProposal<String>>()
+        val signedProposal = mockk<ProposalSigned<String>>()
 
         every { proposal.iteration } returns iterationNumber
         every { proposal.parentChain.blocks } returns notarizedBlocks

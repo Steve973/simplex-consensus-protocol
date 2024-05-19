@@ -10,7 +10,7 @@ import java.util.Objects;
  * @param vote the {@link Vote}
  * @param signature the vote signature for verification purposes
  */
-public record SignedVote(Vote vote, byte[] signature) {
+public record VoteSigned(Vote vote, byte[] signature) {
 
     /**
      * Create an instance with the vote and signature.
@@ -18,7 +18,7 @@ public record SignedVote(Vote vote, byte[] signature) {
      * @param vote the vote
      * @param signature the signature
      */
-    public SignedVote {
+    public VoteSigned {
         Objects.requireNonNull(vote);
         Objects.requireNonNull(signature);
         signature = signature.clone();
@@ -46,7 +46,7 @@ public record SignedVote(Vote vote, byte[] signature) {
     @Override
     public boolean equals(final Object other) {
         boolean result = this == other;
-        if (!result && other instanceof SignedVote signedVote) {
+        if (!result && other instanceof VoteSigned signedVote) {
             result = vote().equals(signedVote.vote()) && Arrays.equals(signature, signedVote.signature);
         }
         return result;
@@ -72,7 +72,7 @@ public record SignedVote(Vote vote, byte[] signature) {
      */
     @Override
     public String toString() {
-        return "SignedVote{"
+        return "VoteSigned{"
                 + "vote=" + vote()
                 + ", signature=" + Arrays.toString(signature)
                 + '}';

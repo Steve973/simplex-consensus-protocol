@@ -2,15 +2,18 @@ package org.storck.simplex.service;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
-import org.storck.simplex.model.SignedVote;
 import org.storck.simplex.model.Vote;
+import org.storck.simplex.model.VoteSigned;
 import org.storck.simplex.networking.api.network.PeerNetworkClient;
 import org.storck.simplex.networking.api.protocol.VoteProtocolMessage;
 import org.storck.simplex.util.MessageUtils;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -46,6 +49,11 @@ public class IterationService {
      * Service that manages communication/messaging between players/peers.
      */
     private final PeerNetworkClient peerNetworkClient;
+
+    /**
+     * Keeps track of the IDs of players that have sent finalizeMsg messages.
+     */
+    private final Set<String> finalizeReceipts = new HashSet<>();
 
     /**
      * The iteration number to which this iteration instance pertains.
@@ -133,13 +141,34 @@ public class IterationService {
                     Vote vote = new Vote(localPlayerId, iterationNumber, "");
                     byte[] voteBytes = MessageUtils.toBytes(vote);
                     byte[] voteSignature = digitalSignatureService.generateSignature(voteBytes);
-                    SignedVote signedVote = new SignedVote(vote, voteSignature);
+                    VoteSigned signedVote = new VoteSigned(vote, voteSignature);
                     peerNetworkClient.broadcastVote(new VoteProtocolMessage(MessageUtils.toBytes(signedVote)));
                 } finally {
                     countDownLatch.countDown();
                 }
             }
         }, 3L * peerNetworkClient.getNetworkDeltaSeconds());
+    }
+
+    /**
+     * If a player sends a finalizeMsg message for the iteration, we capture the
+     * player ID as a record of receiving that
+     * message.
+     *
+     * @param playerId the ID of the player that sent a finalizeMsg message
+     */
+    public void logFinalizeReceipt(final String playerId) {
+        finalizeReceipts.add(playerId);
+    }
+
+    /**
+     * Get the IDs of the players that have sent finalizeMsg messages for this
+     * iteration.
+     *
+     * @return IDs of players that have sent finalizeMsg messages
+     */
+    public Collection<String> getFinalizeReceipts() {
+        return List.copyOf(finalizeReceipts);
     }
 
     /**

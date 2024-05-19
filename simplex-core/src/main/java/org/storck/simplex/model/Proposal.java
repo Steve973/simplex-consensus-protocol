@@ -11,7 +11,7 @@ import java.util.Objects;
  * @param newBlock the new block containing the transactions
  * @param parentChain the parent blockchain on which the new block is built
  */
-public record Proposal<T>(int iteration, String playerId, Block<T> newBlock, NotarizedBlockchain<T> parentChain) {
+public record Proposal<T>(int iteration, String playerId, Block<T> newBlock, BlockchainNotarized<T> parentChain) {
 
     /**
      * Requires non-null for various fields.

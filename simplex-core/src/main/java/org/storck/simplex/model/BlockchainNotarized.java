@@ -10,14 +10,14 @@ import java.util.List;
  * @param <T> the type of the transactions stored in the blocks
  * @param blocks the list of notarized blocks in the blockchain
  */
-public record NotarizedBlockchain<T>(List<NotarizedBlock<T>> blocks) {
+public record BlockchainNotarized<T>(List<BlockNotarized<T>> blocks) {
 
     /**
      * Create the notarized blockchain.
      *
      * @param blocks the blocks that constitute the chain
      */
-    public NotarizedBlockchain {
+    public BlockchainNotarized {
         blocks = new ArrayList<>(blocks);
     }
 
@@ -26,7 +26,7 @@ public record NotarizedBlockchain<T>(List<NotarizedBlock<T>> blocks) {
      *
      * @return an immutable copy of the list of notarized blocks in the blockchain
      */
-    public List<NotarizedBlock<T>> blocks() {
+    public List<BlockNotarized<T>> blocks() {
         return List.copyOf(blocks);
     }
 
@@ -35,7 +35,7 @@ public record NotarizedBlockchain<T>(List<NotarizedBlock<T>> blocks) {
      *
      * @param newBlock the notarized block to be added
      */
-    public void addBlock(final NotarizedBlock<T> newBlock) {
+    public void addBlock(final BlockNotarized<T> newBlock) {
         blocks.add(newBlock);
     }
 }

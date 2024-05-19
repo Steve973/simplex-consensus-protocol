@@ -35,6 +35,33 @@ class PeerInfoShouldSpecTest : ShouldSpec({
       (peerInfo1 == peerInfo2) shouldBe true
    }
 
+   should("test equals method of PeerInfo with different peerIds") {
+      val publicKeyBytes = byteArrayOf(1, 2, 3)
+      val peerInfo1 = PeerInfo("peerId1", publicKeyBytes)
+      val peerInfo2 = PeerInfo("peerId2", publicKeyBytes)
+
+      // Verification
+      (peerInfo1 == peerInfo2) shouldBe false
+   }
+
+   should("test equals method of PeerInfo with different public key bytes") {
+      val publicKeyBytes1 = byteArrayOf(1, 2, 3)
+      val publicKeyBytes2 = byteArrayOf(2, 3, 4)
+      val peerInfo1 = PeerInfo("peerId1", publicKeyBytes1)
+      val peerInfo2 = PeerInfo("peerId1", publicKeyBytes2)
+
+      // Verification
+      (peerInfo1 == peerInfo2) shouldBe false
+   }
+
+   should("test equals method of PeerInfo with same instance compared") {
+      val publicKeyBytes = byteArrayOf(1, 2, 3)
+      val peerInfo = PeerInfo("peerId1", publicKeyBytes)
+
+      // Verification
+      (peerInfo == peerInfo) shouldBe true
+   }
+
    should("test hashCode method of PeerInfo") {
       val publicKeyBytes = byteArrayOf(1, 2, 3)
       val peerInfo = PeerInfo("peerId", publicKeyBytes)
