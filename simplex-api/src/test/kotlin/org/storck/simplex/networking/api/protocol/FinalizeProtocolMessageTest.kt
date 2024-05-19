@@ -17,7 +17,7 @@ class FinalizeProtocolMessageTest : ShouldSpec({
         should("return a clone of the content") {
             val content = byteArrayOf(1, 2, 3)
             val message = FinalizeProtocolMessage(content)
-            message.content() shouldBe content
+            message.getContent() shouldBe content
         }
     }
 
