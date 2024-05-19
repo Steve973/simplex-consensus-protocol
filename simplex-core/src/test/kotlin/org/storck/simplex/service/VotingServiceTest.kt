@@ -10,7 +10,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.storck.simplex.model.Block
 import org.storck.simplex.model.Proposal
-import org.storck.simplex.model.SignedVote
+import org.storck.simplex.model.VoteSigned
 import org.storck.simplex.model.Vote
 import java.security.GeneralSecurityException
 
@@ -95,7 +95,10 @@ class VotingServiceTest : BehaviorSpec({
         }
 
         When("vote has a valid signature") {
-            val signedVote = SignedVote(Vote(playerId, iterationNumber, blockHash), byteArrayOf())
+            val signedVote = VoteSigned(
+                Vote(playerId, iterationNumber, blockHash),
+                byteArrayOf()
+            )
             val result = VotingService.isVoteSignatureValid(mockk(), signedVote, digitalSignatureService)
 
             Then("vote signature should be valid") {
@@ -105,7 +108,10 @@ class VotingServiceTest : BehaviorSpec({
 
         When("vote does not have a valid signature") {
             every { digitalSignatureService.verifySignature(any(), any(), any()) } returns false
-            val signedVote = SignedVote(Vote(playerId, iterationNumber, blockHash), byteArrayOf())
+            val signedVote = VoteSigned(
+                Vote(playerId, iterationNumber, blockHash),
+                byteArrayOf()
+            )
             val result = VotingService.isVoteSignatureValid(mockk(), signedVote, digitalSignatureService)
 
             Then("it should not be valid") {
@@ -114,7 +120,10 @@ class VotingServiceTest : BehaviorSpec({
         }
 
         When("checking vote signature throws exception") {
-            val signedVote = SignedVote(Vote(playerId, iterationNumber, blockHash), byteArrayOf())
+            val signedVote = VoteSigned(
+                Vote(playerId, iterationNumber, blockHash),
+                byteArrayOf()
+            )
             every { digitalSignatureService.verifySignature(any(), any(), any()) } throws GeneralSecurityException()
             val exception = shouldThrow<GeneralSecurityException> {
                 VotingService.isVoteSignatureValid(mockk(), signedVote, digitalSignatureService)
@@ -130,7 +139,7 @@ class VotingServiceTest : BehaviorSpec({
 
         When("validating current iteration, proposal id, signed vote, player service and signature service") {
             val vote = Vote(playerId, iterationNumber, blockHash)
-            val signedVote = SignedVote(vote, byteArrayOf())
+            val signedVote = VoteSigned(vote, byteArrayOf())
             val result = votingService.validateVote(iterationNumber, blockHash, signedVote, playerService, digitalSignatureService)
 
             Then("they should be valid") {
@@ -140,7 +149,7 @@ class VotingServiceTest : BehaviorSpec({
 
         When("processing signedVote") {
             val vote = Vote(playerId, 3, blockHash)
-            val signedVote = SignedVote(vote, byteArrayOf())
+            val signedVote = VoteSigned(vote, byteArrayOf())
             val result = votingService.processVote(signedVote)
 
             Then("they should be processed correctly and return true if a quorum of votes received, false otherwise") {
@@ -152,16 +161,16 @@ class VotingServiceTest : BehaviorSpec({
             val result = votingService.createProposalVote(playerId)
 
             Then("it should return a valid signed vote") {
-                result shouldBe instanceOf<SignedVote>()
+                result shouldBe instanceOf<VoteSigned>()
             }
         }
     }
 
     Given("a vote is cast") {
         val vote1 = Vote(playerId, iterationNumber, blockHash)
-        val signedVote1 = SignedVote(vote1, byteArrayOf())
+        val signedVote1 = VoteSigned(vote1, byteArrayOf())
         val vote2 = Vote("player2", iterationNumber, blockHash)
-        val signedVote2 = SignedVote(vote2, byteArrayOf())
+        val signedVote2 = VoteSigned(vote2, byteArrayOf())
         votingService.processVote(signedVote1)
 
         When("another vote is processed") {

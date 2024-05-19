@@ -10,7 +10,7 @@ import java.util.List;
  * @param block the block of transactions
  * @param votes votes that have been received from players for this block
  */
-public record NotarizedBlock<T>(Block<T> block, List<Vote> votes) {
+public record BlockNotarized<T>(Block<T> block, List<Vote> votes) {
 
     /**
      * Create the notarized block.
@@ -18,7 +18,7 @@ public record NotarizedBlock<T>(Block<T> block, List<Vote> votes) {
      * @param block the block to notarize
      * @param votes the votes from players/peers
      */
-    public NotarizedBlock {
+    public BlockNotarized {
         votes = List.copyOf(votes);
     }
 }

@@ -1,6 +1,7 @@
 package org.storck.simplex.networking.api.network;
 
 import org.storck.simplex.networking.api.protocol.ConsensusProtocolService;
+import org.storck.simplex.networking.api.protocol.FinalizeProtocolMessage;
 import org.storck.simplex.networking.api.protocol.ProposalProtocolMessage;
 import org.storck.simplex.networking.api.protocol.VoteProtocolMessage;
 
@@ -24,6 +25,13 @@ public interface PeerNetworkClient {
      * @param proposal the proposal to broadcast
      */
     void broadcastProposal(ProposalProtocolMessage proposal);
+
+    /**
+     * Broadcasts a finalize message to all peers in the network.
+     *
+     * @param finalize the finalize message to broadcast
+     */
+    void broadcastFinalize(FinalizeProtocolMessage finalize);
 
     /**
      * Get the network delta seconds.

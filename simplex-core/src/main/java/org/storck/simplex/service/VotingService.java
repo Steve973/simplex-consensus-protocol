@@ -4,8 +4,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.storck.simplex.model.Proposal;
-import org.storck.simplex.model.SignedVote;
 import org.storck.simplex.model.Vote;
+import org.storck.simplex.model.VoteSigned;
 import org.storck.simplex.util.MessageUtils;
 
 import java.security.PublicKey;
@@ -125,7 +125,7 @@ public class VotingService<T> {
      * @return true if the signature is valid, false otherwise
      */
     @SneakyThrows
-    static boolean isVoteSignatureValid(final PublicKey playerPublicKey, final SignedVote signedVote, final DigitalSignatureService signatureService) {
+    static boolean isVoteSignatureValid(final PublicKey playerPublicKey, final VoteSigned signedVote, final DigitalSignatureService signatureService) {
         return signatureService.verifySignature(MessageUtils.toBytes(signedVote.vote()), signedVote.signature(), playerPublicKey);
     }
 
@@ -143,7 +143,7 @@ public class VotingService<T> {
      *
      * @return true if the vote is valid, false otherwise
      */
-    public boolean validateVote(final int currentIteration, final String proposalId, final SignedVote signedVote, final PlayerService playerService,
+    public boolean validateVote(final int currentIteration, final String proposalId, final VoteSigned signedVote, final PlayerService playerService,
             final DigitalSignatureService signatureService) {
         Vote vote = signedVote.vote();
         List<Predicate<Vote>> voteChecks = List.of(
@@ -164,7 +164,7 @@ public class VotingService<T> {
      * @return true if the vote is valid and the proposal has a quorum of votes,
      *     false otherwise
      */
-    public boolean processVote(final SignedVote signedVote) {
+    public boolean processVote(final VoteSigned signedVote) {
         boolean result = false;
         if (validateVote(iterationNumber, proposalId, signedVote, playerService, signatureService)) {
             Vote vote = signedVote.vote();
@@ -184,10 +184,10 @@ public class VotingService<T> {
      * 
      * @return a signed vote for the proposal
      */
-    public SignedVote createProposalVote(final String localPlayerId) {
+    public VoteSigned createProposalVote(final String localPlayerId) {
         Vote vote = new Vote(localPlayerId, iterationNumber, proposalId);
         byte[] voteBytes = MessageUtils.toBytes(vote);
         byte[] voteSignature = signatureService.generateSignature(voteBytes);
-        return new SignedVote(vote, voteSignature);
+        return new VoteSigned(vote, voteSignature);
     }
 }

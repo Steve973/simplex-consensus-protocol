@@ -1,8 +1,8 @@
 package org.storck.simplex.service;
 
 import org.storck.simplex.model.Block;
-import org.storck.simplex.model.NotarizedBlock;
-import org.storck.simplex.model.NotarizedBlockchain;
+import org.storck.simplex.model.BlockNotarized;
+import org.storck.simplex.model.BlockchainNotarized;
 import org.storck.simplex.model.Vote;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 
 /**
  * Maintains the blockchain, and provides convenience methods to create
- * specialized blocks, including the genesis block, dummy block, and finalize
+ * specialized blocks, including the genesis block, dummy block, and finalizeMsg
  * block.
  *
  * @param <T> the type of block transactions
@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 public class BlockchainService<T> {
 
     /** Contains all notarized (accepted) blocks. */
-    private final NotarizedBlockchain<T> notarizedBlockchain;
+    private final BlockchainNotarized<T> notarizedBlockchain;
 
     /**
      * Creates a dummy block with the specified iteration number.
@@ -41,14 +41,14 @@ public class BlockchainService<T> {
     /**
      * Creates a notarized block using the given block and set of quorum votes.
      */
-    public final BiFunction<Block<T>, List<Vote>, NotarizedBlock<T>> createNotarizedBlock = NotarizedBlock::new;
+    public final BiFunction<Block<T>, List<Vote>, BlockNotarized<T>> createNotarizedBlock = BlockNotarized::new;
 
     /**
      * Create the service to maintain the blockchain and create specialized blocks.
      */
     public BlockchainService() {
-        this.notarizedBlockchain = new NotarizedBlockchain<>(new ArrayList<>());
-        notarizedBlockchain.addBlock(new NotarizedBlock<>(createGenesisBlock.get(), List.of()));
+        this.notarizedBlockchain = new BlockchainNotarized<>(new ArrayList<>());
+        notarizedBlockchain.addBlock(new BlockNotarized<>(createGenesisBlock.get(), List.of()));
     }
 
     /**
@@ -56,7 +56,7 @@ public class BlockchainService<T> {
      *
      * @return an immutable copy of the current blockchain state
      */
-    public List<NotarizedBlock<T>> getBlockchain() {
+    public List<BlockNotarized<T>> getBlockchain() {
         return List.copyOf(notarizedBlockchain.blocks());
     }
 }
