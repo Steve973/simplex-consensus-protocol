@@ -292,7 +292,11 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("an unexpected message for processing") {
-        val message = ProtocolMessage { ProtocolMessageType.OTHER }
+        val message = object : ProtocolMessage(byteArrayOf(1, 2, 3)) {
+            override fun getType(): ProtocolMessageType {
+                return ProtocolMessageType.OTHER
+            }
+        }
 
         When("an unexpected message is processed") {
             protocolService.processProtocolMessage(message)

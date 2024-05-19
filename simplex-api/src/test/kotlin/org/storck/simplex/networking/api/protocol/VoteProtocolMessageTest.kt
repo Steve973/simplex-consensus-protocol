@@ -17,7 +17,7 @@ class VoteProtocolMessageTest : ShouldSpec({
         should("return a clone of the content") {
             val content = byteArrayOf(1, 2, 3)
             val message = VoteProtocolMessage(content)
-            message.content() shouldBe content
+            message.getContent() shouldBe content
         }
     }
 

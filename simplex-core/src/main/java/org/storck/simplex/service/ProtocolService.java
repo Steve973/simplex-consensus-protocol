@@ -192,7 +192,7 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
         switch (messageType) {
             case VOTE_MESSAGE -> {
                 VoteProtocolMessage voteMessage = (VoteProtocolMessage) message;
-                VoteSigned signedVote = MessageUtils.fromBytes(voteMessage.content(), new TypeReference<>() {
+                VoteSigned signedVote = MessageUtils.fromBytes(voteMessage.getContent(), new TypeReference<>() {
                 });
                 if (votingService.processVote(signedVote)) {
                     // TODO: Quorum was reached, so blockchain is considered notarized -- handle
@@ -205,7 +205,7 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
             }
             case PROPOSAL_MESSAGE -> {
                 ProposalProtocolMessage proposalMessage = (ProposalProtocolMessage) message;
-                ProposalSigned<T> signedProposal = MessageUtils.fromBytes(proposalMessage.content(), new TypeReference<>() {
+                ProposalSigned<T> signedProposal = MessageUtils.fromBytes(proposalMessage.getContent(), new TypeReference<>() {
                 });
                 processNotarizedBlockchain(signedProposal.proposal().parentChain());
                 if (proposalService.processProposal(signedProposal, blockchainService.getBlockchain())) {
@@ -218,14 +218,14 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
             }
             case FINALIZE_MESSAGE -> {
                 FinalizeProtocolMessage finalizeMessage = (FinalizeProtocolMessage) message;
-                FinalizeSigned finalizeSigned = MessageUtils.fromBytes(finalizeMessage.content(), new TypeReference<>() {
+                FinalizeSigned finalizeSigned = MessageUtils.fromBytes(finalizeMessage.getContent(), new TypeReference<>() {
                 });
                 Finalize finalizeMsg = finalizeSigned.finalizeMsg();
                 String playerId = finalizeSigned.finalizeMsg().playerId();
                 PublicKey playerPublicKey = playerService.getPublicKey(playerId);
                 boolean finalizeValid;
                 try {
-                    finalizeValid = signatureService.verifySignature(finalizeMessage.content(), finalizeSigned.signature(), playerPublicKey);
+                    finalizeValid = signatureService.verifySignature(finalizeMessage.getContent(), finalizeSigned.signature(), playerPublicKey);
                 } catch (GeneralSecurityException e) {
                     throw new IllegalArgumentException("Received an invalid finalize message", e);
                 }
