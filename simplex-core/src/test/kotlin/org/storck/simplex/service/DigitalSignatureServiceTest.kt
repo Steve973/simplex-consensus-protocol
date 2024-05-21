@@ -3,8 +3,8 @@ package org.storck.simplex.service
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
-import io.kotest.matchers.shouldBe
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import org.storck.simplex.model.Block
 import java.security.KeyPair
@@ -19,6 +19,9 @@ import java.security.PublicKey
 class DigitalSignatureServiceTest : BehaviorSpec({
 
     val signatureService = DigitalSignatureService()
+    val defaultMessageDigestAlgorithm = "SHA3-512"
+    val defaultKeypairGeneratorAlgorithm = "EC"
+    val defaultSignatureAlgorithm = "SHA384withECDSA"
     val messageDigestAlgorithm = "SHA-256"
     val keypairGeneratorAlgorithm = "RSA"
     val signatureAlgorithm = "SHA256withRSA"
@@ -34,6 +37,16 @@ class DigitalSignatureServiceTest : BehaviorSpec({
                 result.shouldNotBeNull()
                 result.private!!.shouldNotBeNull()
                 result.public!!.shouldNotBeNull()
+                result.private.encoded.size shouldBe 194
+                result.public.encoded.size shouldBe 120
+            }
+        }
+
+        When("the keypair generator algorithm name id retrieved") {
+            val kpgaResult = signatureService.keypairGeneratorAlgorithm
+
+            Then("the expected algorithm name is returned") {
+                kpgaResult shouldBe defaultKeypairGeneratorAlgorithm
             }
         }
 
@@ -42,6 +55,7 @@ class DigitalSignatureServiceTest : BehaviorSpec({
 
             Then("generated signature should not be null") {
                 result.shouldNotBeNull()
+                signatureService.signatureAlgorithm shouldBe defaultSignatureAlgorithm
             }
         }
 
@@ -51,6 +65,7 @@ class DigitalSignatureServiceTest : BehaviorSpec({
             val result: Boolean = signatureService.verifySignature(input, signature, wrongPublicKey)
 
             Then("signature validation should fail") {
+                signatureService.signatureAlgorithm shouldBe defaultSignatureAlgorithm
                 result.shouldBe(false)
             }
         }
@@ -60,6 +75,7 @@ class DigitalSignatureServiceTest : BehaviorSpec({
             val result: Boolean = signatureService.verifySignature(input, signature, signatureService.keyPair!!.public!!)
 
             Then("signature validation should succeed") {
+                signatureService.signatureAlgorithm shouldBe defaultSignatureAlgorithm
                 result.shouldBe(true)
             }
         }
@@ -70,6 +86,7 @@ class DigitalSignatureServiceTest : BehaviorSpec({
         When("computeBytesHash is called") {
             val result = signatureService.computeBytesHash(input)
             Then("computed hash should not be null and have correct length") {
+                signatureService.messageDigestAlgorithm shouldBe defaultMessageDigestAlgorithm
                 result.shouldNotBeNull()
                 result.length.shouldBe(128)
             }
@@ -106,6 +123,8 @@ class DigitalSignatureServiceTest : BehaviorSpec({
                 result.shouldNotBeNull()
                 result.private.shouldNotBeNull()
                 result.public.shouldNotBeNull()
+                result.private.encoded.size shouldBe 194
+                result.public.encoded.size shouldBe 120
             }
         }
     }
@@ -130,7 +149,7 @@ class DigitalSignatureServiceTest : BehaviorSpec({
             val kpgaResult = sigSvc.keypairGeneratorAlgorithm
             val saResult = sigSvc.signatureAlgorithm
 
-            Then("KeyPair should not be null and have correct length") {
+            Then("the expected algorithm names are returned") {
                 mdaResult shouldBe messageDigestAlgorithm
                 kpgaResult shouldBe keypairGeneratorAlgorithm
                 saResult shouldBe saResult
@@ -143,6 +162,7 @@ class DigitalSignatureServiceTest : BehaviorSpec({
 
         When("a message digest is requested") {
             val exception = shouldThrow<IllegalStateException> {
+                sigSvc.messageDigestAlgorithm shouldBe badAlgorithm
                 sigSvc.computeBytesHash(byteArrayOf(1, 2, 3, 4, 5))
             }
 

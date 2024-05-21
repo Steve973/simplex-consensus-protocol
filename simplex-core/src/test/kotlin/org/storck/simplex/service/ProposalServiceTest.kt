@@ -9,6 +9,7 @@ import io.mockk.*
 import org.storck.simplex.model.*
 import org.storck.simplex.networking.api.network.PeerNetworkClient
 import org.storck.simplex.networking.api.protocol.ProposalProtocolMessage
+import org.storck.simplex.util.MessageUtils
 import java.util.concurrent.TransferQueue
 
 /**
@@ -29,6 +30,8 @@ class ProposalServiceTest : BehaviorSpec({
     val parentBlock = mockk<BlockNotarized<String>>()
     val notarizedBlock = mockk<BlockNotarized<String>>()
     val notarizedBlocks = listOf(notarizedBlock)
+
+    mockkStatic(MessageUtils::class)
 
     val proposalService = ProposalService<String>(localPlayerId, signatureService, peerNetworkClient)
 
@@ -61,6 +64,18 @@ class ProposalServiceTest : BehaviorSpec({
     }
 
     given("checks if the parent chain of a proposal is the current notarized chain") {
+        every { proposal.parentChain.blocks } returns listOf()
+
+        `when`("Check to see if the parent chain of a proposal is the current notarized chain") {
+            val result = ProposalService.isParentChainCurrentChain(proposal, notarizedBlocks)
+
+            then("Parent chain is not the current chain") {
+                result shouldBe false
+            }
+        }
+    }
+
+    given("a parent chain that is not the current notarized chain") {
         every { proposal.parentChain.blocks } returns notarizedBlocks
 
         `when`("Check to see if the parent chain of a proposal is the current notarized chain") {
@@ -201,10 +216,15 @@ class ProposalServiceTest : BehaviorSpec({
         every { signatureService.generateSignature(any(ByteArray::class)) } returns signature
         every { peerNetworkClient.broadcastProposal(any(ProposalProtocolMessage::class)) } just Runs
 
+        val proposalCapture = slot<Proposal<String>>()
+        every { MessageUtils.toBytes(capture(proposalCapture)) } returns byteArrayOf(1, 2, 3)
+
         `when`("Propose a new block") {
             proposalService.proposeNewBlock(notarizedBlocks, iterationNumber)
+            val proposalBlock = proposalCapture.captured.newBlock
 
             then("The network client should broadcast the block, meaning that all checks passed and the block is proposed successfully") {
+                proposalBlock.height shouldBe iterationNumber + 1
                 verify(exactly = 1) { peerNetworkClient.broadcastProposal(any(ProposalProtocolMessage::class)) }
             }
         }
@@ -282,6 +302,62 @@ class ProposalServiceTest : BehaviorSpec({
 
             then("Should be false, indicating that the proposal is not valid") {
                 result shouldBe false
+            }
+        }
+    }
+
+    given("a valid proposal") {
+        val iterationNumber = 2
+        val signedProposal = mockk<ProposalSigned<String>>()
+
+        every { proposal.iteration } returns iterationNumber
+        every { proposal.parentChain.blocks } returns notarizedBlocks
+        every { proposal.newBlock } returns newBlock
+        every { newBlock.height } returns 2
+        every { notarizedBlock.block.height } returns 1
+        every { newBlock.parentHash } returns blockHash
+        every { signedProposal.proposal } returns proposal
+        every { signatureService.computeBlockHash(any<Block<String>>()) } returns blockHash
+
+        `when`("Validate the proposal") {
+            val result = proposalService.isValidProposal(signedProposal, notarizedBlocks)
+
+            then("Should be true, indicating that the valid proposal passed validation checks") {
+                result shouldBe true
+                proposalService.processedProposalIds shouldContain blockHash
+            }
+        }
+    }
+
+    given("an invalid proposal") {
+        val signedProposal = mockk<ProposalSigned<String>>()
+        every { signedProposal.proposal } returns proposal
+
+        When("proposal is not for the current iteration") {
+            every { proposal.iteration } returns 1
+
+            Then("isValidProposal should return false") {
+                proposalService.isValidProposal(signedProposal, notarizedBlocks) shouldBe false
+            }
+        }
+
+        When("proposal's parent chain is not the current notarized chain") {
+            every { proposal.iteration } returns 2
+            every { proposal.parentChain.blocks() } returns emptyList()
+
+            Then("isValidProposal should return false") {
+                proposalService.isValidProposal(signedProposal, notarizedBlocks) shouldBe false
+            }
+        }
+
+        When("the proposal does not properly extend the blockchain") {
+            every { proposal.iteration } returns 2
+            every { proposal.parentChain.blocks() } returns notarizedBlocks
+            every { proposal.newBlock } returns newBlock
+            every { newBlock.parentHash } returns "ohNoItIsTheWrongHash"
+
+            Then("isValidProposal should return false") {
+                proposalService.isValidProposal(signedProposal, notarizedBlocks) shouldBe false
             }
         }
     }

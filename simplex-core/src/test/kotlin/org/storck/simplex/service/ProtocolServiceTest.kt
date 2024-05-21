@@ -66,6 +66,7 @@ class ProtocolServiceTest : BehaviorSpec({
             val svc = ProtocolService<String>(peerNetworkClient)
 
             Then("Service created successfully") {
+                svc.isShutdown shouldBe false
                 svc shouldNotBe null
             }
         }
@@ -85,6 +86,7 @@ class ProtocolServiceTest : BehaviorSpec({
             protocolService.processNetworkMessage(message)
 
             Then("New peer is added") {
+                protocolService.isShutdown shouldBe false
                 verify { playerService.addPlayer(any<String>(), any<PublicKey>()) }
             }
         }
@@ -106,6 +108,7 @@ class ProtocolServiceTest : BehaviorSpec({
             protocolService.processNetworkMessage(message)
 
             Then("Peer is disconnected") {
+                protocolService.isShutdown shouldBe false
                 verify(exactly = 1) { playerService.removePlayer(peerId) }
             }
         }
@@ -126,6 +129,7 @@ class ProtocolServiceTest : BehaviorSpec({
             protocolService.processNetworkMessage(message)
 
             Then("Peer is disconnected") {
+                protocolService.isShutdown shouldBe false
                 verify(exactly = 1) { playerService.removePlayer(peerId) }
             }
         }
@@ -139,6 +143,7 @@ class ProtocolServiceTest : BehaviorSpec({
             protocolService.processNetworkMessage(message)
 
             Then("Nothing should happen") {
+                protocolService.isShutdown shouldBe false
                 verify(exactly = 0) { playerService.addPlayer(any(), any()) }
                 verify(exactly = 0) { playerService.removePlayer(any()) }
             }
@@ -154,6 +159,7 @@ class ProtocolServiceTest : BehaviorSpec({
             protocolService.processNetworkMessage(message)
 
             Then("Nothing should happen") {
+                protocolService.isShutdown shouldBe false
                 verify(exactly = 0) { message.event }
             }
         }
@@ -172,6 +178,7 @@ class ProtocolServiceTest : BehaviorSpec({
             protocolService.processProtocolMessage(voteMessage)
 
             Then("the service attempts to process and broadcast the vote") {
+                protocolService.isShutdown shouldBe false
                 verify(exactly = 1) { votingService.processVote(any()) }
                 verify(exactly = 0) { iterationService.stopIteration() }
             }
@@ -192,6 +199,7 @@ class ProtocolServiceTest : BehaviorSpec({
             protocolService.processProtocolMessage(voteMessage)
 
             Then("the service attempts to process and broadcast the vote") {
+                protocolService.isShutdown shouldBe false
                 verify(exactly = 1) { votingService.processVote(any()) }
                 verify(exactly = 1) { iterationService.stopIteration() }
             }
@@ -227,6 +235,7 @@ class ProtocolServiceTest : BehaviorSpec({
             protocolService.processProtocolMessage(proposalMessage)
 
             Then("the service attempts to process the proposal and broadcasts a vote") {
+                protocolService.isShutdown shouldBe false
                 verify(exactly = 1) { proposalService.processProposal(any(), any()) }
                 verify(exactly = 1) { votingService.initializeForIteration(any(), any()) }
                 verify(exactly = 1) { votingService.createProposalVote(localPlayerId) }
@@ -260,6 +269,7 @@ class ProtocolServiceTest : BehaviorSpec({
             protocolService.processProtocolMessage(proposalMessage)
 
             Then("the service attempts to process the proposal and broadcasts a vote") {
+                protocolService.isShutdown shouldBe false
                 verify(exactly = 1) { proposalService.processProposal(any(), any()) }
             }
         }
@@ -286,6 +296,7 @@ class ProtocolServiceTest : BehaviorSpec({
             protocolService.processProtocolMessage(finalizeMessage)
 
             Then("Something evaluated here") {
+                protocolService.isShutdown shouldBe false
                 // TODO: The behavior for FINALIZE_MESSAGE case is not finished yet, so update this later!
             }
         }
@@ -302,6 +313,7 @@ class ProtocolServiceTest : BehaviorSpec({
             protocolService.processProtocolMessage(message)
 
             Then("The default case should be invoked, so no service calls should be made") {
+                protocolService.isShutdown shouldBe false
                 verify(exactly = 0) { votingService.processVote(any()) }
                 verify(exactly = 0) { proposalService.processProposal(any(), any()) }
             }
@@ -320,6 +332,7 @@ class ProtocolServiceTest : BehaviorSpec({
             protocolService.processTransactions(transactions)
 
             Then("it passes the transactions to the proposal service") {
+                protocolService.isShutdown shouldBe false
                 verify(exactly = 1) { proposalService.addTransactions(transactions) }
             }
         }
@@ -334,6 +347,7 @@ class ProtocolServiceTest : BehaviorSpec({
             protocolService.processNotarizedBlockchain(notarizedBlockchain)
 
             Then("it synchronizes iteration number based on the size of the notarized blockchain") {
+                protocolService.isShutdown shouldBe false
                 verify { iterationService.stopIteration() }
             }
         }
@@ -349,6 +363,7 @@ class ProtocolServiceTest : BehaviorSpec({
             svc.processNotarizedBlockchain(notarizedBlockchain)
 
             Then("nothing happens because the number of blocks is not greater than the iteration number") {
+                protocolService.isShutdown shouldBe false
                 verify(exactly = 0) { iterationService.stopIteration() }
             }
         }
@@ -373,6 +388,7 @@ class ProtocolServiceTest : BehaviorSpec({
             job.join()
 
             Then("the protocol runs its iterations until shut down") {
+//                protocolService.isShutdown shouldBe true
                 verify(atLeast = 1) { iterationService.initializeForIteration(any(), any()) }
                 verify(atLeast = 1) { iterationService.startIteration() }
                 verify(atLeast = 1) { iterationService.awaitCompletion() }
@@ -400,6 +416,7 @@ class ProtocolServiceTest : BehaviorSpec({
             job.join()
 
             Then("as the leader, the proposal service should be called to propose a new block") {
+//                protocolService.isShutdown shouldBe true
                 verify(atLeast = 1) { proposalService.proposeNewBlock(any<List<BlockNotarized<String>>>(), any<Int>()) }
             }
         }
