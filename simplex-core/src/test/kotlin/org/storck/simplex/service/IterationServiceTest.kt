@@ -98,9 +98,9 @@ class IterationServiceTest : BehaviorSpec({
         every { peerNetworkClient.getNetworkDeltaSeconds() } returns 0
         every { peerNetworkClient.broadcastVote(any()) } just Runs
         iterationService.initializeForIteration(iterationNumber, latch)
-        iterationService.startIteration()
 
         When("iteration does not complete before duration expires") {
+            iterationService.startIteration()
             delay(100)
 
             Then("timer task fires to run iteration timeout tasks") {
