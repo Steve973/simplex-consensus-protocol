@@ -28,64 +28,91 @@ class IterationServiceTest : BehaviorSpec({
     val playerService = mockk<PlayerService>()
     val latch = mockk<CountDownLatch>()
     val digitalSignatureService = mockk<DigitalSignatureService>()
-    val peerNetworkClient = mockk<PeerNetworkClient>(relaxed = true)
+    val peerNetworkClient = mockk<PeerNetworkClient>()
+
+    afterTest {
+        clearAllMocks()
+    }
 
     Given("IterationService is initialized with certain services") {
         val iterationService =
             IterationService(localPlayerId, playerService, digitalSignatureService, peerNetworkClient)
+        val realLatch = CountDownLatch(1)
+        every { peerNetworkClient.broadcastVote(any()) } just Runs
 
         When("initializeForIteration method is called") {
-
             every { playerService.playerIds } returns players
             every { digitalSignatureService.computeBytesHash(any<ByteArray>()) } returns "hash"
 
-            iterationService.initializeForIteration(iterationNumber, latch)
+            iterationService.initializeForIteration(iterationNumber, realLatch)
 
             Then("electLeader method is called with the iteration number") {
                 iterationService.iterationNumber shouldBe iterationNumber
                 iterationService.leaderId?.let { it shouldBe players[0] }
+                realLatch.count shouldBe 1
             }
         }
 
         When("startIteration method is called") {
-            every { peerNetworkClient.getNetworkDeltaSeconds() } returns networkDeltaSeconds
-            every { digitalSignatureService.computeBytesHash(any<ByteArray>()) } returns "hash"
+            every { peerNetworkClient.networkDeltaSeconds } returns networkDeltaSeconds
             every { digitalSignatureService.generateSignature(any<ByteArray>()) } returns signatureBytes
 
             iterationService.startIteration()
 
-            Then("broadcastVote is invoked on PeerNetworkClient") {
+            Then("the timer is started with a delay based on the network delta seconds from the peer client") {
                 verify { peerNetworkClient.getNetworkDeltaSeconds() }
-                verify { digitalSignatureService.computeBytesHash(any<ByteArray>()) }
+                realLatch.count shouldBe 1
             }
         }
 
         When("stopIteration method is called") {
-            every { latch.countDown() } just Runs
-
             iterationService.stopIteration()
 
             Then("timer is cancelled and iteration is stopped") {
-                // Check by trying to start again and seeing if the exceptions are handled
+                realLatch.count shouldBe 0
+                // Check by trying to start again and seeing if the exceptions are thrown
                 shouldThrowAny { iterationService.startIteration() }
             }
         }
 
         When("awaitCompletion method is called") {
-            every { peerNetworkClient.getNetworkDeltaSeconds() } returns networkDeltaSeconds
+            every { playerService.playerIds } returns players
+            every { peerNetworkClient.networkDeltaSeconds } returns networkDeltaSeconds
+            every { digitalSignatureService.computeBytesHash(any<ByteArray>()) } returns "hash"
             every { digitalSignatureService.generateSignature(any<ByteArray>()) } returns signatureBytes
-            every { latch.await() } just Runs
 
-            iterationService.initializeForIteration(iterationNumber, latch)
-            iterationService.startIteration()
+            iterationService.awaitCompletion()
 
             Then("awaitCompletion should successfully complete") {
-                iterationService.awaitCompletion()
+                realLatch.count shouldBe 0
+            }
+        }
+    }
+
+    Given("a running iteration to time out") {
+        val iterationService =
+            IterationService(localPlayerId, playerService, digitalSignatureService, peerNetworkClient)
+        every { playerService.playerIds } returns players
+        every { digitalSignatureService.computeBytesHash(any<ByteArray>()) } returns "hash"
+        every { digitalSignatureService.generateSignature(any<ByteArray>()) } returns signatureBytes
+        every { peerNetworkClient.getNetworkDeltaSeconds() } returns 0
+        every { peerNetworkClient.broadcastVote(any()) } just Runs
+        iterationService.initializeForIteration(iterationNumber, latch)
+        iterationService.startIteration()
+
+        When("iteration does not complete before duration expires") {
+            delay(100)
+
+            Then("timer task fires to run iteration timeout tasks") {
+                verify { peerNetworkClient.broadcastVote(any()) }
+                verify { latch.countDown() }
             }
         }
     }
 
     Given("Iteration Service") {
+        every { playerService.playerIds } returns players
+        every { digitalSignatureService.computeBytesHash(any<ByteArray>()) } returns "hash"
         val iterationService = IterationService(localPlayerId, playerService, digitalSignatureService, peerNetworkClient)
 
         When("awaitCompletion method is called") {

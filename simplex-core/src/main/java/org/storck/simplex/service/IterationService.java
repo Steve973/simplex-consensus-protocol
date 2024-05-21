@@ -78,6 +78,11 @@ public class IterationService {
     private Timer timer;
 
     /**
+     * The timer task that is responsible for ending the iteration when the allotted duration elapses.
+     */
+    private TimerTask timerTask;
+
+    /**
      * Create a service instance that will need to be further initialized by calling
      * {@link #initializeForIteration(int, CountDownLatch)} with the iteration
      * number.
@@ -108,10 +113,28 @@ public class IterationService {
      * @param countDownLatch the latch to wait for the completion of the iteration
      */
     public void initializeForIteration(final int iterationNumber, final CountDownLatch countDownLatch) {
+        if (iterationNumber <= this.iterationNumber) {
+            throw new IllegalArgumentException("Iteration number must only increase");
+        }
         this.iterationNumber = iterationNumber;
         this.leaderId = electLeader(iterationNumber);
         this.countDownLatch = countDownLatch;
         this.timer = new Timer(TIMER_NAME_PREFIX + iterationNumber);
+        this.timerTask = new TimerTask() {
+
+            @Override
+            public void run() {
+                try {
+                    Vote vote = new Vote(localPlayerId, iterationNumber, "");
+                    byte[] voteBytes = MessageUtils.toBytes(vote);
+                    byte[] voteSignature = digitalSignatureService.generateSignature(voteBytes);
+                    VoteSigned signedVote = new VoteSigned(vote, voteSignature);
+                    peerNetworkClient.broadcastVote(new VoteProtocolMessage(MessageUtils.toBytes(signedVote)));
+                } finally {
+                    countDownLatch.countDown();
+                }
+            }
+        };
     }
 
     /**
@@ -133,21 +156,7 @@ public class IterationService {
      * times out.
      */
     public void startIteration() {
-        this.timer.schedule(new TimerTask() {
-
-            @Override
-            public void run() {
-                try {
-                    Vote vote = new Vote(localPlayerId, iterationNumber, "");
-                    byte[] voteBytes = MessageUtils.toBytes(vote);
-                    byte[] voteSignature = digitalSignatureService.generateSignature(voteBytes);
-                    VoteSigned signedVote = new VoteSigned(vote, voteSignature);
-                    peerNetworkClient.broadcastVote(new VoteProtocolMessage(MessageUtils.toBytes(signedVote)));
-                } finally {
-                    countDownLatch.countDown();
-                }
-            }
-        }, 3L * peerNetworkClient.getNetworkDeltaSeconds());
+        this.timer.schedule(this.timerTask, 3L * peerNetworkClient.getNetworkDeltaSeconds());
     }
 
     /**
