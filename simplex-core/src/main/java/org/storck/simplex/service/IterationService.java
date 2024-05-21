@@ -78,7 +78,8 @@ public class IterationService {
     private Timer timer;
 
     /**
-     * The timer task that is responsible for ending the iteration when the allotted duration elapses.
+     * The timer task that is responsible for ending the iteration when the allotted
+     * duration elapses.
      */
     private TimerTask timerTask;
 
