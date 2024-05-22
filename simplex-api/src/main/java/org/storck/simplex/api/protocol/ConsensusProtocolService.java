@@ -1,7 +1,8 @@
-package org.storck.simplex.networking.api.protocol;
+package org.storck.simplex.api.protocol;
 
-import org.storck.simplex.networking.api.message.NetworkMessage;
-import org.storck.simplex.networking.api.message.ProtocolMessage;
+import org.storck.simplex.api.message.NetworkMessage;
+import org.storck.simplex.api.message.ProtocolMessage;
+import org.storck.simplex.api.network.PeerNetworkClient;
 
 import java.util.Collection;
 
@@ -9,7 +10,7 @@ import java.util.Collection;
  * Defines the methods that a service implementing the Simplex consensus
  * protocol must implement in order to participate in the protocol and
  * interoperate with the
- * {@link org.storck.simplex.networking.api.network.PeerNetworkClient}.
+ * {@link PeerNetworkClient}.
  *
  * @param <T> the type of transactions supported by the protocol
  */

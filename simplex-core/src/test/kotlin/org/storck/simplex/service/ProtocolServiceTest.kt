@@ -11,14 +11,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.storck.simplex.api.message.ProtocolMessage
+import org.storck.simplex.api.message.ProtocolMessageType
 import org.storck.simplex.model.*
-import org.storck.simplex.networking.api.message.*
-import org.storck.simplex.networking.api.network.NetworkEvent
-import org.storck.simplex.networking.api.network.NetworkEventMessage
-import org.storck.simplex.networking.api.network.PeerNetworkClient
-import org.storck.simplex.networking.api.protocol.FinalizeProtocolMessage
-import org.storck.simplex.networking.api.protocol.ProposalProtocolMessage
-import org.storck.simplex.networking.api.protocol.VoteProtocolMessage
+import org.storck.simplex.api.network.NetworkEvent
+import org.storck.simplex.api.network.NetworkEventMessage
+import org.storck.simplex.api.network.PeerNetworkClient
+import org.storck.simplex.api.protocol.FinalizeProtocolMessage
+import org.storck.simplex.api.protocol.ProposalProtocolMessage
+import org.storck.simplex.api.protocol.VoteProtocolMessage
 import org.storck.simplex.util.MessageUtils
 import java.security.GeneralSecurityException
 import java.security.PublicKey
@@ -28,7 +29,7 @@ import java.security.PublicKey
  */
 @SuppressFBWarnings(
     value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "NP_NULL_ON_SOME_PATH", "RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT"],
-    justification = "I cannot find anything wrong with the test, and mock objects used in a test do not need to be serializable.")
+    justification = "It is a test.")
 class ProtocolServiceTest : BehaviorSpec({
     val details = "details"
     val peerId = "peerId"

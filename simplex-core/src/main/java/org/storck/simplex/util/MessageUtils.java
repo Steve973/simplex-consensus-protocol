@@ -5,8 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.experimental.UtilityClass;
+import org.storck.simplex.api.network.NetworkEventMessage;
 import org.storck.simplex.model.PeerInfo;
-import org.storck.simplex.networking.api.network.NetworkEventMessage;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

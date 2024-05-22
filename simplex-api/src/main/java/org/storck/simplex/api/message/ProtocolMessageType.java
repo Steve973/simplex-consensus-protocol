@@ -1,4 +1,4 @@
-package org.storck.simplex.networking.api.message;
+package org.storck.simplex.api.message;
 
 /**
  * The types of protocol message between players in a consensus protocol.

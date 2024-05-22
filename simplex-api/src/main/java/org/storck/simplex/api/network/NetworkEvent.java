@@ -1,4 +1,4 @@
-package org.storck.simplex.networking.api.network;
+package org.storck.simplex.api.network;
 
 /** Indicates the different network events that can occur. */
 public enum NetworkEvent {

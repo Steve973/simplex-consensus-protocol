@@ -1,7 +1,7 @@
-package org.storck.simplex.networking.api.protocol;
+package org.storck.simplex.api.protocol;
 
-import org.storck.simplex.networking.api.message.ProtocolMessage;
-import org.storck.simplex.networking.api.message.ProtocolMessageType;
+import org.storck.simplex.api.message.ProtocolMessage;
+import org.storck.simplex.api.message.ProtocolMessageType;
 
 /**
  * Represents a protocol message used for voting.

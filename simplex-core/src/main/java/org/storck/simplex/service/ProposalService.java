@@ -1,12 +1,12 @@
 package org.storck.simplex.service;
 
+import org.storck.simplex.api.network.PeerNetworkClient;
+import org.storck.simplex.api.protocol.ProposalProtocolMessage;
 import org.storck.simplex.model.Block;
 import org.storck.simplex.model.BlockNotarized;
 import org.storck.simplex.model.BlockchainNotarized;
 import org.storck.simplex.model.Proposal;
 import org.storck.simplex.model.ProposalSigned;
-import org.storck.simplex.networking.api.network.PeerNetworkClient;
-import org.storck.simplex.networking.api.protocol.ProposalProtocolMessage;
 import org.storck.simplex.util.MessageUtils;
 
 import java.util.ArrayList;

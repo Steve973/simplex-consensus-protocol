@@ -11,7 +11,7 @@ import io.kotest.matchers.shouldNotBe
 @SuppressFBWarnings(
     value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "SE_BAD_FIELD_STORE", "NP_NONNULL_PARAM_VIOLATION",
         "RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", "EC_NULL_ARG"],
-    justification = "I cannot find anything wrong with the test.")
+    justification = "It is a test.")
 class VoteSignedTest : ShouldSpec({
     val vote1 = Vote("player1", 1, "block1hash")
     val vote2 = Vote("player2", 2, "block2hash")

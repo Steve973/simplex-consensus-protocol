@@ -11,7 +11,7 @@ import io.kotest.matchers.shouldNotBe
 @SuppressFBWarnings(
     value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "SE_BAD_FIELD_STORE",
         "NP_NONNULL_PARAM_VIOLATION", "EC_NULL_ARG"],
-    justification = "I cannot find anything wrong with the test.")
+    justification = "It is a test.")
 class FinalizeSignedTest : ShouldSpec({
     val finalize1 = Finalize("player1", 1)
     val finalize2 = Finalize("player2", 2)

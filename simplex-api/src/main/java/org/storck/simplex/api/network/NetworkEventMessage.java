@@ -1,7 +1,7 @@
-package org.storck.simplex.networking.api.network;
+package org.storck.simplex.api.network;
 
-import org.storck.simplex.networking.api.message.NetworkMessage;
-import org.storck.simplex.networking.api.message.NetworkMessageType;
+import org.storck.simplex.api.message.NetworkMessage;
+import org.storck.simplex.api.message.NetworkMessageType;
 
 /**
  * Network message implementation for notifications of network events.

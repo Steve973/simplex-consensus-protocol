@@ -7,8 +7,8 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import org.storck.simplex.model.*
-import org.storck.simplex.networking.api.network.PeerNetworkClient
-import org.storck.simplex.networking.api.protocol.ProposalProtocolMessage
+import org.storck.simplex.api.network.PeerNetworkClient
+import org.storck.simplex.api.protocol.ProposalProtocolMessage
 import org.storck.simplex.util.MessageUtils
 import java.util.concurrent.TransferQueue
 
@@ -17,7 +17,7 @@ import java.util.concurrent.TransferQueue
  */
 @SuppressFBWarnings(
     value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD"],
-    justification = "I cannot find anything wrong with the test, and mock objects used in a test do not need to be serializable.")
+    justification = "It is a test.")
 class ProposalServiceTest : BehaviorSpec({
 
     val localPlayerId = "localPlayerId"
