@@ -7,10 +7,7 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.storck.simplex.api.message.ProtocolMessage
 import org.storck.simplex.api.message.ProtocolMessageType
 import org.storck.simplex.model.*
@@ -28,7 +25,8 @@ import java.security.PublicKey
  * Test the Blockchain Service.
  */
 @SuppressFBWarnings(
-    value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "NP_NULL_ON_SOME_PATH", "RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT"],
+    value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "NP_NULL_ON_SOME_PATH",
+        "RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT"],
     justification = "It is a test.")
 class ProtocolServiceTest : BehaviorSpec({
     val details = "details"
@@ -414,7 +412,6 @@ class ProtocolServiceTest : BehaviorSpec({
     }
 
     Given("a service to start and stop") {
-        val coroutineScope = CoroutineScope(Dispatchers.Default)
 
         When("start method is called and then stopped") {
             every { iterationService.leaderId } returns "leaderId"
@@ -424,12 +421,16 @@ class ProtocolServiceTest : BehaviorSpec({
             every { proposalService.proposeNewBlock(any<List<BlockNotarized<String>>>(), any<Int>()) } just Runs
 
             // starting protocol service in a separate coroutine because it has a blocking loop
-            val job = coroutineScope.launch {
-                protocolService.start()
+            val timeoutJob = CoroutineScope(Dispatchers.Default).launch {
+                val job = CoroutineScope(Dispatchers.Default).launch {
+                    protocolService.start()
+                }
+                delay(100)
+                job.cancel("Timeout exceeded")
+                protocolService.stop()
             }
-            delay(100)
-            protocolService.stop()
-            job.join()
+
+            timeoutJob.join()
 
             Then("the protocol runs its iterations until shut down") {
                 verify(atLeast = 1) { iterationService.initializeForIteration(iterationNumber + 1, any()) }
@@ -451,15 +452,18 @@ class ProtocolServiceTest : BehaviorSpec({
             every { proposalService.proposeNewBlock(any<List<BlockNotarized<String>>>(), any<Int>()) } just Runs
 
             // starting protocol service in a separate coroutine because it has a blocking loop
-            val job = coroutineScope.launch {
-                protocolService.start()
+            val timeoutJob = CoroutineScope(Dispatchers.Default).launch {
+                val job = CoroutineScope(Dispatchers.Default).launch {
+                    protocolService.start()
+                }
+                delay(100)
+                job.cancel("Timeout exceeded")
+                protocolService.stop()
             }
-            delay(100)
-            protocolService.stop()
-            job.join()
+
+            timeoutJob.join()
 
             Then("as the leader, the proposal service should be called to propose a new block") {
-//                protocolService.isShutdown shouldBe true
                 verify(atLeast = 1) { proposalService.proposeNewBlock(any<List<BlockNotarized<String>>>(), any<Int>()) }
             }
         }

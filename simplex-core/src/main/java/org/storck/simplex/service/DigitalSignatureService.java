@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
+import org.bouncycastle.crypto.fips.FipsSecureRandom;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.storck.simplex.model.Block;
 
@@ -151,10 +152,10 @@ public class DigitalSignatureService {
      *
      * @return a new KeyPair
      */
-    public final KeyPair generateKeyPair() {
+    private KeyPair generateKeyPair() {
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keypairGeneratorAlgorithm, BOUNCY_CASTLE_FIPS_PROVIDER);
-            keyPairGenerator.initialize(384);
+            keyPairGenerator.initialize(384, FipsSecureRandom.getInstanceStrong());
             return keyPairGenerator.generateKeyPair();
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("Could not generate a key pair for cryptological operations", e);

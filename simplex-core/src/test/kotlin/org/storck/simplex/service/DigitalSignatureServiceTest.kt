@@ -1,24 +1,30 @@
 package org.storck.simplex.service
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import io.kotest.assertions.fail
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.*
+import org.bouncycastle.crypto.fips.FipsSecureRandom
+import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider
 import org.storck.simplex.model.Block
 import java.security.KeyPair
+import java.security.KeyPairGenerator
 import java.security.PublicKey
 
 /**
  * This class contains unit tests for the DigitalSignatureService class.
  */
 @SuppressFBWarnings(
-    value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "SE_BAD_FIELD_STORE"],
+    value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "SE_BAD_FIELD_STORE", "NP_NULL_ON_SOME_PATH"],
     justification = "It is a test.")
 class DigitalSignatureServiceTest : BehaviorSpec({
 
-    val signatureService = DigitalSignatureService()
+    lateinit var signatureService: DigitalSignatureService
     val defaultMessageDigestAlgorithm = "SHA3-512"
     val defaultKeypairGeneratorAlgorithm = "EC"
     val defaultSignatureAlgorithm = "SHA384withECDSA"
@@ -27,16 +33,29 @@ class DigitalSignatureServiceTest : BehaviorSpec({
     val signatureAlgorithm = "SHA256withRSA"
     val badAlgorithm = "OOPS"
 
+    beforeTest {
+        val timeoutJob = CoroutineScope(Dispatchers.Default).launch {
+            try {
+                withTimeout(500) {
+                    signatureService = DigitalSignatureService()
+                }
+            } catch (ignored: TimeoutCancellationException) {
+                fail("Could not create an instance of the DigitalSignatureService")
+            }
+        }
+        timeoutJob.join()
+    }
+
     Given("a DigitalSignatureService instance with key pair") {
         val input = byteArrayOf(1, 2, 3, 4, 5)
 
         When("key pair is generated") {
-            val result: KeyPair = signatureService.generateKeyPair()!!
+            val result = signatureService.keyPair
 
             Then("key pair should not be null") {
                 result.shouldNotBeNull()
-                result.private!!.shouldNotBeNull()
-                result.public!!.shouldNotBeNull()
+                result.private.shouldNotBeNull()
+                result.public.shouldNotBeNull()
                 result.private.encoded.size shouldBe 194
                 result.public.encoded.size shouldBe 120
             }
@@ -61,7 +80,9 @@ class DigitalSignatureServiceTest : BehaviorSpec({
 
         When("wrong public key is used") {
             val signature: ByteArray = signatureService.generateSignature(input)!!
-            val wrongPublicKey: PublicKey = signatureService.generateKeyPair()!!.public!!
+            val keyPairGenerator = KeyPairGenerator.getInstance(defaultKeypairGeneratorAlgorithm, BouncyCastleFipsProvider())
+            keyPairGenerator.initialize(384, FipsSecureRandom.getInstanceStrong())
+            val wrongPublicKey = keyPairGenerator.generateKeyPair().public
             val result: Boolean = signatureService.verifySignature(input, signature, wrongPublicKey)
 
             Then("signature validation should fail") {
@@ -118,7 +139,8 @@ class DigitalSignatureServiceTest : BehaviorSpec({
 
     Given("a DigitalSignatureService instance") {
         When("a new KeyPair is generated") {
-            val result = signatureService.generateKeyPair()
+            val result = signatureService.keyPair
+
             Then("KeyPair should not be null") {
                 result.shouldNotBeNull()
                 result.private.shouldNotBeNull()
@@ -130,8 +152,9 @@ class DigitalSignatureServiceTest : BehaviorSpec({
     }
 
     Given("the byte array representation of a public key") {
-        val keyPair = signatureService.generateKeyPair()!!
+        val keyPair = signatureService.keyPair
         val keyBytes = keyPair.public.encoded
+
         When("publicKeyFromBytes is called") {
             val result = signatureService.publicKeyFromBytes(keyBytes)
             Then("PublicKey instance should not be null and match initial key") {
@@ -142,12 +165,22 @@ class DigitalSignatureServiceTest : BehaviorSpec({
     }
 
     Given("the instance is constructed with algorithm names") {
-        val sigSvc = DigitalSignatureService(messageDigestAlgorithm, keypairGeneratorAlgorithm, signatureAlgorithm)
+        var sigSvc: DigitalSignatureService? = null
+        val timeoutJob = CoroutineScope(Dispatchers.Default).launch {
+            try {
+                withTimeout(500) {
+                    sigSvc = DigitalSignatureService(messageDigestAlgorithm, keypairGeneratorAlgorithm, signatureAlgorithm)
+                }
+            } catch (ignored: TimeoutCancellationException) {
+                fail("Could not create an instance of the DigitalSignatureService")
+            }
+        }
+        timeoutJob.join()
 
         When("the algorithm names are retrieved") {
-            val mdaResult = sigSvc.messageDigestAlgorithm
-            val kpgaResult = sigSvc.keypairGeneratorAlgorithm
-            val saResult = sigSvc.signatureAlgorithm
+            val mdaResult = sigSvc!!.messageDigestAlgorithm
+            val kpgaResult = sigSvc!!.keypairGeneratorAlgorithm
+            val saResult = sigSvc!!.signatureAlgorithm
 
             Then("the expected algorithm names are returned") {
                 mdaResult shouldBe messageDigestAlgorithm
@@ -158,12 +191,22 @@ class DigitalSignatureServiceTest : BehaviorSpec({
     }
 
     Given("the service is created with a bad message digest algorithm") {
-        val sigSvc = DigitalSignatureService(badAlgorithm, keypairGeneratorAlgorithm, signatureAlgorithm)
+        var sigSvc: DigitalSignatureService? = null
+        val timeoutJob = CoroutineScope(Dispatchers.Default).launch {
+            try {
+                withTimeout(500) {
+                    sigSvc = DigitalSignatureService(badAlgorithm, keypairGeneratorAlgorithm, signatureAlgorithm)
+                }
+            } catch (ignored: TimeoutCancellationException) {
+                fail("Could not create an instance of the DigitalSignatureService")
+            }
+        }
+        timeoutJob.join()
 
         When("a message digest is requested") {
             val exception = shouldThrow<IllegalStateException> {
-                sigSvc.messageDigestAlgorithm shouldBe badAlgorithm
-                sigSvc.computeBytesHash(byteArrayOf(1, 2, 3, 4, 5))
+                sigSvc!!.messageDigestAlgorithm shouldBe badAlgorithm
+                sigSvc!!.computeBytesHash(byteArrayOf(1, 2, 3, 4, 5))
             }
 
             Then("Error message should indicate that the message digest algorithm is invalid") {

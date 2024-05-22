@@ -6,6 +6,5 @@ dependencies {
     implementation(project(":simplex-api"))
 
     implementation(libs.bouncycastle.provider.fips)
-    implementation(libs.google.guava)
     implementation(libs.jackson.databind)
 }
