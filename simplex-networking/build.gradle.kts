@@ -4,7 +4,4 @@ plugins {
 
 dependencies {
     implementation(project(":simplex-api"))
-
-    implementation(libs.bouncycastle.provider.fips)
-    implementation(libs.netty.all)
 }

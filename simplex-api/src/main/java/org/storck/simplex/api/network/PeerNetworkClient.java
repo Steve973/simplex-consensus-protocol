@@ -1,9 +1,9 @@
-package org.storck.simplex.networking.api.network;
+package org.storck.simplex.api.network;
 
-import org.storck.simplex.networking.api.protocol.ConsensusProtocolService;
-import org.storck.simplex.networking.api.protocol.FinalizeProtocolMessage;
-import org.storck.simplex.networking.api.protocol.ProposalProtocolMessage;
-import org.storck.simplex.networking.api.protocol.VoteProtocolMessage;
+import org.storck.simplex.api.protocol.ConsensusProtocolService;
+import org.storck.simplex.api.protocol.FinalizeProtocolMessage;
+import org.storck.simplex.api.protocol.ProposalProtocolMessage;
+import org.storck.simplex.api.protocol.VoteProtocolMessage;
 
 /**
  * Specifies the methods that a {@link PeerNetworkClient} implementation must

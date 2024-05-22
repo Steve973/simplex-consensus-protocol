@@ -1,4 +1,4 @@
-package org.storck.simplex.networking.api.message;
+package org.storck.simplex.api.message;
 
 /**
  * An enumeration representing the different types of network messages.

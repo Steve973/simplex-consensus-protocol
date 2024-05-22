@@ -2,10 +2,10 @@ package org.storck.simplex.service;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
+import org.storck.simplex.api.network.PeerNetworkClient;
+import org.storck.simplex.api.protocol.VoteProtocolMessage;
 import org.storck.simplex.model.Vote;
 import org.storck.simplex.model.VoteSigned;
-import org.storck.simplex.networking.api.network.PeerNetworkClient;
-import org.storck.simplex.networking.api.protocol.VoteProtocolMessage;
 import org.storck.simplex.util.MessageUtils;
 
 import java.math.BigInteger;

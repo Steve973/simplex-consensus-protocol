@@ -9,7 +9,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.*
 import kotlinx.coroutines.delay
-import org.storck.simplex.networking.api.network.PeerNetworkClient
+import org.storck.simplex.api.network.PeerNetworkClient
 import java.util.concurrent.CountDownLatch
 import kotlin.concurrent.thread
 
@@ -18,7 +18,7 @@ import kotlin.concurrent.thread
  */
 @SuppressFBWarnings(
     value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "NP_NULL_ON_SOME_PATH"],
-    justification = "I cannot find anything wrong with the test, and mock objects used in a test do not need to be serializable."
+    justification = "It is a test."
 )
 class IterationServiceTest : BehaviorSpec({
     val localPlayerId = "testPlayer"

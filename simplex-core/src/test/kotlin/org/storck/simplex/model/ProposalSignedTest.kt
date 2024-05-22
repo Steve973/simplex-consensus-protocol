@@ -12,11 +12,11 @@ import java.util.*
  */
 @SuppressFBWarnings(
     value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "SE_BAD_FIELD_STORE", "NP_NONNULL_PARAM_VIOLATION", "RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE"],
-    justification = "I cannot find anything wrong with the test.")
+    justification = "It is a test.")
 class ProposalSignedTest : ShouldSpec({
 
     should("initialize ProposalSigned") {
-        val block = Block<String>(1, "parentHash", listOf("Transaction1", "Transaction2"))
+        val block = Block(1, "parentHash", listOf("Transaction1", "Transaction2"))
         val vote = Vote("playerId", 1, "blockHash")
         val notarizedBlock = BlockNotarized<String>(block, listOf(vote))
         val parentChain = BlockchainNotarized(listOf(notarizedBlock))
@@ -31,7 +31,7 @@ class ProposalSignedTest : ShouldSpec({
     }
 
     should("test equals method of ProposalSigned") {
-        val block = Block<String>(1, "parentHash", listOf("Transaction1", "Transaction2"))
+        val block = Block(1, "parentHash", listOf("Transaction1", "Transaction2"))
         val vote = Vote("playerId", 1, "blockHash")
         val notarizedBlock = BlockNotarized<String>(block, listOf(vote))
         val parentChain = BlockchainNotarized(listOf(notarizedBlock))
@@ -45,7 +45,7 @@ class ProposalSignedTest : ShouldSpec({
     }
 
     should("test equals method of ProposalSigned with different proposal") {
-        val block = Block<String>(1, "parentHash", listOf("Transaction1", "Transaction2"))
+        val block = Block(1, "parentHash", listOf("Transaction1", "Transaction2"))
         val vote = Vote("playerId", 1, "blockHash")
         val notarizedBlock = BlockNotarized<String>(block, listOf(vote))
         val parentChain = BlockchainNotarized(listOf(notarizedBlock))
@@ -60,7 +60,7 @@ class ProposalSignedTest : ShouldSpec({
     }
 
     should("test equals method of ProposalSigned with different signature") {
-        val block = Block<String>(1, "parentHash", listOf("Transaction1", "Transaction2"))
+        val block = Block(1, "parentHash", listOf("Transaction1", "Transaction2"))
         val vote = Vote("playerId", 1, "blockHash")
         val notarizedBlock = BlockNotarized<String>(block, listOf(vote))
         val parentChain = BlockchainNotarized(listOf(notarizedBlock))
@@ -75,7 +75,7 @@ class ProposalSignedTest : ShouldSpec({
     }
 
     should("test equals method of ProposalSigned with same instance compared") {
-        val block = Block<String>(1, "parentHash", listOf("Transaction1", "Transaction2"))
+        val block = Block(1, "parentHash", listOf("Transaction1", "Transaction2"))
         val vote = Vote("playerId", 1, "blockHash")
         val notarizedBlock = BlockNotarized<String>(block, listOf(vote))
         val parentChain = BlockchainNotarized(listOf(notarizedBlock))
@@ -88,9 +88,9 @@ class ProposalSignedTest : ShouldSpec({
     }
 
     should("test hashCode method of ProposalSigned") {
-        val block = Block<String>(1, "parentHash", listOf("Transaction1", "Transaction2"))
+        val block = Block(1, "parentHash", listOf("Transaction1", "Transaction2"))
         val vote = Vote("playerId", 1, "blockHash")
-        val notarizedBlock = BlockNotarized<String>(block, listOf(vote))
+        val notarizedBlock = BlockNotarized(block, listOf(vote))
         val parentChain = BlockchainNotarized(listOf(notarizedBlock))
         val proposal = Proposal(1, "playerId", block, parentChain)
         val signature = byteArrayOf(1, 2, 3)
@@ -101,7 +101,7 @@ class ProposalSignedTest : ShouldSpec({
     }
 
     should("test toString method of ProposalSigned") {
-        val block = Block<String>(1, "parentHash", listOf("Transaction1", "Transaction2"))
+        val block = Block(1, "parentHash", listOf("Transaction1", "Transaction2"))
         val vote = Vote("playerId", 1, "blockHash")
         val notarizedBlock = BlockNotarized<String>(block, listOf(vote))
         val parentChain = BlockchainNotarized(listOf(notarizedBlock))
@@ -114,13 +114,14 @@ class ProposalSignedTest : ShouldSpec({
     }
 
     should("throw NullPointerException when initialize ProposalSigned with null proposal") {
+        val nullProposal: Proposal<String>? = null
         shouldThrow<NullPointerException> {
-            ProposalSigned(null as Proposal<String>, byteArrayOf(1, 2, 3))
+            ProposalSigned(nullProposal, byteArrayOf(1, 2, 3))
         }
     }
 
     should("throw NullPointerException when initialize ProposalSigned with null signature") {
-        val block = Block<String>(1, "parentHash", listOf("Transaction1", "Transaction2"))
+        val block = Block(1, "parentHash", listOf("Transaction1", "Transaction2"))
         val vote = Vote("playerId", 1, "blockHash")
         val notarizedBlock = BlockNotarized<String>(block, listOf(vote))
         val parentChain = BlockchainNotarized(listOf(notarizedBlock))

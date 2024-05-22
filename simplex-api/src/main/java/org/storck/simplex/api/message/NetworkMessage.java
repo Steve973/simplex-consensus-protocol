@@ -1,4 +1,4 @@
-package org.storck.simplex.networking.api.message;
+package org.storck.simplex.api.message;
 
 /**
  * Defines the base functionality for any network message; this is mostly for
