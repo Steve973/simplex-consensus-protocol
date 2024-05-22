@@ -2,6 +2,7 @@ package org.storck.simplex.service
 
 import com.fasterxml.jackson.core.type.TypeReference
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -19,6 +20,7 @@ import org.storck.simplex.networking.api.protocol.FinalizeProtocolMessage
 import org.storck.simplex.networking.api.protocol.ProposalProtocolMessage
 import org.storck.simplex.networking.api.protocol.VoteProtocolMessage
 import org.storck.simplex.util.MessageUtils
+import java.security.GeneralSecurityException
 import java.security.PublicKey
 
 /**
@@ -302,6 +304,23 @@ class ProtocolServiceTest : BehaviorSpec({
                 protocolService.isShutdown shouldBe false
                 // TODO: The behavior for FINALIZE_MESSAGE case is not finished yet, so update this later!
                 verify(exactly = 1) { iterationService.logFinalizeReceipt(any()) }
+            }
+        }
+
+        When("signature service throws an exception") {
+            every { finalize.playerId } returns "otherPlayerId"
+            every { finalizeMessage.type } returns ProtocolMessageType.FINALIZE_MESSAGE
+            every { finalizeMessage.content } returns finalizeContentBytes
+            every { MessageUtils.fromBytes(any<ByteArray>(), any<TypeReference<Any>>()) } returns signedFinalize
+            every { signedFinalize.finalizeMsg } returns finalize
+            every { signedFinalize.signature } returns finalizeContentBytes
+            every { playerService.getPublicKey(any()) } returns playerPubKey
+            every { signatureService.verifySignature(any(), any(), any()) } throws GeneralSecurityException("test")
+
+            val exception = shouldThrow<IllegalArgumentException> { protocolService.processProtocolMessage(finalizeMessage) }
+
+            Then("exception should indicate that the finalize message was invalid") {
+                exception.message shouldBe "Received an invalid finalize message"
             }
         }
     }
