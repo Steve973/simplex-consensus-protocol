@@ -73,13 +73,17 @@ class VoteSignedTest : ShouldSpec({
         should("return same hash code for equal objects") {
             val voteSigned1 = VoteSigned(vote1, signature1)
             val voteSigned2 = VoteSigned(vote1, signature1)
-            voteSigned1.hashCode() shouldBe voteSigned2.hashCode()
+            val hashCode = voteSigned1.hashCode()
+            hashCode shouldBe voteSigned2.hashCode()
+            hashCode shouldBe 1994606177
         }
 
         should("return different hash code for different objects") {
             val voteSigned1 = VoteSigned(vote1, signature1)
             val voteSigned2 = VoteSigned(vote2, signature2)
-            voteSigned1.hashCode() shouldNotBe voteSigned2.hashCode()
+            val hashCode = voteSigned1.hashCode()
+            hashCode shouldNotBe voteSigned2.hashCode()
+            hashCode shouldBe 1994606177
         }
     }
 

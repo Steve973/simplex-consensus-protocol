@@ -9,7 +9,8 @@ import io.kotest.matchers.shouldNotBe
  * Tests the customized methods in the {@link FinalizedSigned} class.
  */
 @SuppressFBWarnings(
-    value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "SE_BAD_FIELD_STORE", "NP_NONNULL_PARAM_VIOLATION", "EC_NULL_ARG"],
+    value = ["NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE", "SE_BAD_FIELD", "SE_BAD_FIELD_STORE",
+        "NP_NONNULL_PARAM_VIOLATION", "EC_NULL_ARG"],
     justification = "I cannot find anything wrong with the test.")
 class FinalizeSignedTest : ShouldSpec({
     val finalize1 = Finalize("player1", 1)
@@ -72,13 +73,17 @@ class FinalizeSignedTest : ShouldSpec({
         should("return same hash code for equal objects") {
             val finalizeSigned1 = FinalizeSigned(finalize1, signature1)
             val finalizeSigned2 = FinalizeSigned(finalize1, signature1)
-            finalizeSigned1.hashCode() shouldBe finalizeSigned2.hashCode()
+            val hashCode = finalizeSigned1.hashCode()
+            hashCode shouldBe finalizeSigned2.hashCode()
+            hashCode shouldBe -1872059983
         }
 
         should("return different hash code for different objects") {
             val finalizeSigned1 = FinalizeSigned(finalize1, signature1)
             val finalizeSigned2 = FinalizeSigned(finalize2, signature2)
-            finalizeSigned1.hashCode() shouldNotBe finalizeSigned2.hashCode()
+            val hashCode = finalizeSigned1.hashCode()
+            hashCode shouldNotBe finalizeSigned2.hashCode()
+            hashCode shouldBe -1872059983
         }
     }
 

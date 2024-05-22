@@ -1,6 +1,7 @@
 package org.storck.simplex.service
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldContain
@@ -34,6 +35,31 @@ class IterationServiceTest : BehaviorSpec({
         clearAllMocks()
     }
 
+    Given("an iteration to initialize") {
+        val iterationService =
+            IterationService(localPlayerId, playerService, digitalSignatureService, peerNetworkClient)
+        every { playerService.playerIds } returns listOf(localPlayerId)
+        every { digitalSignatureService.computeBytesHash(any<ByteArray>()) } returns "hash"
+        iterationService.initializeForIteration(5, latch)
+
+
+        When("initializing iteration for same iteration number") {
+            val exception = shouldThrow<IllegalArgumentException> { iterationService.initializeForIteration(5, latch) }
+
+            Then("there should be an error message indicating that the iteration number must increase") {
+                exception.message shouldBe "Iteration number must only increase"
+            }
+        }
+
+        When("initializing iteration for lower iteration number") {
+            val exception = shouldThrow<IllegalArgumentException> { iterationService.initializeForIteration(1, latch) }
+
+            Then("there should be an error message indicating that the iteration number must increase") {
+                exception.message shouldBe "Iteration number must only increase"
+            }
+        }
+    }
+
     Given("IterationService is initialized with certain services") {
         val iterationService =
             IterationService(localPlayerId, playerService, digitalSignatureService, peerNetworkClient)
@@ -50,6 +76,7 @@ class IterationServiceTest : BehaviorSpec({
                 iterationService.iterationNumber shouldBe iterationNumber
                 iterationService.leaderId?.let { it shouldBe players[0] }
                 realLatch.count shouldBe 1
+                iterationService.isShutdown shouldBe false
             }
         }
 
@@ -62,6 +89,7 @@ class IterationServiceTest : BehaviorSpec({
             Then("the timer is started with a delay based on the network delta seconds from the peer client") {
                 verify { peerNetworkClient.getNetworkDeltaSeconds() }
                 realLatch.count shouldBe 1
+                iterationService.isShutdown shouldBe false
             }
         }
 
@@ -70,6 +98,7 @@ class IterationServiceTest : BehaviorSpec({
 
             Then("timer is cancelled and iteration is stopped") {
                 realLatch.count shouldBe 0
+                iterationService.isShutdown shouldBe true
                 // Check by trying to start again and seeing if the exceptions are thrown
                 shouldThrowAny { iterationService.startIteration() }
             }
@@ -138,7 +167,7 @@ class IterationServiceTest : BehaviorSpec({
     Given("received finalize message") {
         val iterationService = IterationService(localPlayerId, playerService, digitalSignatureService, peerNetworkClient)
 
-        When("log that payer sent finalize message") {
+        When("log that player sent finalize message") {
             iterationService.logFinalizeReceipt(localPlayerId)
 
             Then("receipts should contain the playerId that sent the finalize message") {

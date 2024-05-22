@@ -231,6 +231,7 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
                 }
                 if (finalizeValid) {
                     log.info("Received finalizeMsg message for iteration number: {}", finalizeMsg.iteration());
+                    iterationService.logFinalizeReceipt(finalizeMsg.playerId());
                     // TODO: handle finalization:
                     // evaluate if the specified iteration number has finalize messages from 2/3
                     // players
@@ -268,6 +269,7 @@ public class ProtocolService<T> implements ConsensusProtocolService<T> {
             FinalizeSigned finalizeSigned = new FinalizeSigned(finalizeMessage, signatureService.generateSignature(MessageUtils.toBytes(finalizeMessage)));
             FinalizeProtocolMessage finalizeProtocolMessage = new FinalizeProtocolMessage(MessageUtils.toBytes(finalizeSigned));
             peerNetworkClient.broadcastFinalize(finalizeProtocolMessage);
+            iterationService.stopIteration();
         } else if (chainLength > iterationNumber) {
             iterationNumber = chainLength;
             iterationService.stopIteration();
