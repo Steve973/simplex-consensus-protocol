@@ -8,7 +8,7 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.*
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import org.storck.simplex.api.network.PeerNetworkClient
 import java.util.concurrent.CountDownLatch
 import kotlin.concurrent.thread
@@ -94,7 +94,15 @@ class IterationServiceTest : BehaviorSpec({
         }
 
         When("stopIteration method is called") {
-            iterationService.stopIteration()
+            val timeoutJob = CoroutineScope(Dispatchers.Default).launch {
+                val job = CoroutineScope(Dispatchers.Default).launch {
+                    iterationService.stopIteration()
+                }
+                delay(100)
+                job.cancel("Timeout exceeded")
+            }
+
+            timeoutJob.join()
 
             Then("timer is cancelled and iteration is stopped") {
                 realLatch.count shouldBe 0
@@ -110,7 +118,14 @@ class IterationServiceTest : BehaviorSpec({
             every { digitalSignatureService.computeBytesHash(any<ByteArray>()) } returns "hash"
             every { digitalSignatureService.generateSignature(any<ByteArray>()) } returns signatureBytes
 
-            iterationService.awaitCompletion()
+            val timeoutJob = CoroutineScope(Dispatchers.Default).launch {
+                val job = CoroutineScope(Dispatchers.Default).launch {
+                    iterationService.awaitCompletion()
+                }
+                delay(100)
+                job.cancel("Timeout exceeded")
+            }
+            timeoutJob.join()
 
             Then("awaitCompletion should successfully complete") {
                 realLatch.count shouldBe 0

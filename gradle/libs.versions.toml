@@ -1,11 +1,9 @@
 [versions]
 bouncycastleFips = "1.0.2.5"
 dependencyLicenseReport = "2.7"
-guava = "33.2.0-jre"
 jackson = "2.17.1"
 kotest = "5.9.0"
-kotlin = "1.9.24"
-libp2p = "1.1.0-RELEASE"
+kotlin = "2.0.0"
 lombok = "1.18.32"
 mockk = "1.13.11"
 pitest = "1.15.0"
@@ -18,7 +16,6 @@ spotless = "6.25.0"
 [libraries]
 bouncycastle-provider-fips = { module = "org.bouncycastle:bc-fips", version.ref = "bouncycastleFips" }
 dependency-license-report-plugin = { module = "com.github.jk1.dependency-license-report:com.github.jk1.dependency-license-report.gradle.plugin", version.ref = "dependencyLicenseReport" }
-google-guava = { module = "com.google.guava:guava", version.ref = "guava" }
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
@@ -28,7 +25,6 @@ kotest-property = { module = "io.kotest:kotest-property-jvm", version.ref = "kot
 kotest-junit5 = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
 kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
-libp2p-jvm = { module = "io.libp2p:jvm-libp2p", version.ref = "libp2p" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 pitest-plugin = { module = "info.solidsoft.gradle.pitest:gradle-pitest-plugin", version.ref = "pitest" }
