@@ -14,21 +14,18 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Handles the lifecycle of an iteration, including backup steps, timers, leader
  * proposal, voting, and transitioning to the next iteration.
  */
+@SuppressWarnings("PMD.DoNotUseThreads") // Need a timer to handle the iteration timeout
 public class IterationService {
-
-    /**
-     * Name prefix for an iteration timer. The iteration number should be appended
-     * to this name.
-     */
-    private static final String TIMER_NAME_PREFIX = "TimerForIteration_";
 
     /**
      * The player ID for this (local) node.
@@ -75,7 +72,7 @@ public class IterationService {
     /**
      * The timer to fire when the duration of this iteration expires.
      */
-    private Timer timer;
+    private ScheduledExecutorService scheduledExecutorService;
 
     /**
      * The timer task that is responsible for ending the iteration when the allotted
@@ -120,7 +117,7 @@ public class IterationService {
         this.iterationNumber = iterationNumber;
         this.leaderId = electLeader(iterationNumber);
         this.countDownLatch = countDownLatch;
-        this.timer = new Timer(TIMER_NAME_PREFIX + iterationNumber);
+        this.scheduledExecutorService = Executors.newScheduledThreadPool(1);
         this.timerTask = new TimerTask() {
 
             @Override
@@ -157,7 +154,7 @@ public class IterationService {
      * times out.
      */
     public void startIteration() {
-        this.timer.schedule(this.timerTask, 3L * peerNetworkClient.getNetworkDeltaSeconds());
+        this.scheduledExecutorService.schedule(this.timerTask, 3L * peerNetworkClient.getNetworkDeltaSeconds(), TimeUnit.SECONDS);
     }
 
     /**
@@ -186,7 +183,7 @@ public class IterationService {
      * iteration immediately.
      */
     public void stopIteration() {
-        timer.cancel();
+        scheduledExecutorService.shutdownNow();
         this.countDownLatch.countDown();
     }
 
@@ -197,5 +194,14 @@ public class IterationService {
      */
     public void awaitCompletion() throws InterruptedException {
         this.countDownLatch.await();
+    }
+
+    /**
+     * If the timer is shut down, this returns true, or false otherwise.
+     *
+     * @return true if the timer is shut down, or false otherwise
+     */
+    public boolean isShutdown() {
+        return scheduledExecutorService.isShutdown();
     }
 }

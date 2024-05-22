@@ -236,6 +236,8 @@ class ProtocolServiceTest : BehaviorSpec({
 
             Then("the service attempts to process the proposal and broadcasts a vote") {
                 protocolService.isShutdown shouldBe false
+                verify(exactly = 2) { signedProposal.proposal }
+                verify(exactly = 1) { proposal.parentChain }
                 verify(exactly = 1) { proposalService.processProposal(any(), any()) }
                 verify(exactly = 1) { votingService.initializeForIteration(any(), any()) }
                 verify(exactly = 1) { votingService.createProposalVote(localPlayerId) }
@@ -292,12 +294,14 @@ class ProtocolServiceTest : BehaviorSpec({
             every { signatureService.verifySignature(any(), any(), any()) } returns true
             every { finalize.playerId } returns "otherPlayerId"
             every { finalize.iteration } returns iterationNumber
+            every { iterationService.logFinalizeReceipt(any()) } just Runs
 
             protocolService.processProtocolMessage(finalizeMessage)
 
             Then("Something evaluated here") {
                 protocolService.isShutdown shouldBe false
                 // TODO: The behavior for FINALIZE_MESSAGE case is not finished yet, so update this later!
+                verify(exactly = 1) { iterationService.logFinalizeReceipt(any()) }
             }
         }
     }
@@ -369,6 +373,26 @@ class ProtocolServiceTest : BehaviorSpec({
         }
     }
 
+    Given("blockchain is notarized") {
+        val svc = ProtocolService("test", 2, playerService, signatureService, proposalService,
+            votingService, blockchainService, peerNetworkClient, iterationService)
+
+        When("synchronizeIterationNumber is called with blockchain for iteration, and has height same as iteration") {
+            every { notarizedBlockchain.blocks() } answers { listOf(block1) }
+            every { iterationService.stopIteration() } just Runs
+            every { signatureService.generateSignature(any()) } returns byteArrayOf(0x01, 0x02, 0x03)
+            every { peerNetworkClient.broadcastFinalize(any()) } just Runs
+
+            svc.processNotarizedBlockchain(notarizedBlockchain)
+
+            Then("iteration should be stopped and finalize should be broadcast") {
+                protocolService.isShutdown shouldBe false
+                verify { peerNetworkClient.broadcastFinalize(any()) }
+                verify(exactly = 1) { iterationService.stopIteration() }
+            }
+        }
+    }
+
     Given("a service to start and stop") {
         val coroutineScope = CoroutineScope(Dispatchers.Default)
 
@@ -388,8 +412,7 @@ class ProtocolServiceTest : BehaviorSpec({
             job.join()
 
             Then("the protocol runs its iterations until shut down") {
-//                protocolService.isShutdown shouldBe true
-                verify(atLeast = 1) { iterationService.initializeForIteration(any(), any()) }
+                verify(atLeast = 1) { iterationService.initializeForIteration(iterationNumber + 1, any()) }
                 verify(atLeast = 1) { iterationService.startIteration() }
                 verify(atLeast = 1) { iterationService.awaitCompletion() }
             }
