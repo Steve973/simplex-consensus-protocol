@@ -5,10 +5,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
-import org.bouncycastle.crypto.fips.FipsSecureRandom;
+import org.bouncycastle.crypto.EntropySourceProvider;
+import org.bouncycastle.crypto.fips.FipsDRBG;
+import org.bouncycastle.crypto.util.BasicEntropySourceProvider;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.storck.simplex.model.Block;
 
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -17,6 +20,7 @@ import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
@@ -29,6 +33,18 @@ import java.util.stream.IntStream;
  */
 @Getter
 public class DigitalSignatureService {
+
+    /**
+     * A byte array used for personalization in creating the random number
+     * generator.
+     */
+    private static final byte[] PERSONALIZATION_STRING = "".getBytes(StandardCharsets.UTF_8);
+
+    /**
+     * A "number used once" for the random number generator. Here, we use a string
+     * representation of the current system time, then convert to a byte array.
+     */
+    private static final byte[] NONCE = String.valueOf(System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8);
 
     /** Algorithm used for message digest computation. */
     private static final String MESSAGE_DIGEST_ALGORITHM = "SHA3-512";
@@ -148,6 +164,39 @@ public class DigitalSignatureService {
     }
 
     /**
+     * Generates a FIPS-compliant secure random number generator. As described in
+     * "The Bouncy Castle FIPS Java API in 100 Examples" by David Hook:
+     * <blockquote>
+     * The next thing to note in the example is that the SecureRandom is not created
+     * via the Java provider mechanism. This is because the SecureRandom returned is
+     * an extension of the regular SecureRandom class called FipsSecureRandom. In
+     * this case an extension class was necessary as a NIST DRBG requires methods
+     * such as FipsSecureRandom.reseed() which are not available on SecureRandom (in
+     * this case even SecureRandom.setSeed() is not really a suitable candidate).
+     * The second thing to note is the false parameter value on the
+     * FipsDRBG.Builder.build() method. This refers to the “prediction resistance”
+     * required of the constructed DRBG. In this case we are willing to assume that
+     * the DRBG function will do a good job producing a random stream and that's
+     * enough. In the case of keys or components of keys we need a higher standard
+     * to be reached so we set “prediction resistance” to true as in the following
+     * example.
+     * </blockquote>
+     *
+     * @return a FIPS-compliant secure random number generator
+     *
+     * @see <a href=
+     *     "http://git.bouncycastle.org/fips-java/BCFipsIn100.pdf">BCFipsIn100</a>
+     */
+    private static SecureRandom getSecureRandom() {
+        EntropySourceProvider entSource = new BasicEntropySourceProvider(new SecureRandom(), true);
+        FipsDRBG.Builder fipsDrbgBuilder = FipsDRBG.SHA512_HMAC.fromEntropySource(entSource)
+                .setSecurityStrength(256)
+                .setEntropyBitsRequired(256)
+                .setPersonalizationString(PERSONALIZATION_STRING);
+        return fipsDrbgBuilder.build(NONCE, true);
+    }
+
+    /**
      * Generates a new KeyPair using the Bouncy Castle FIPS provider.
      *
      * @return a new KeyPair
@@ -155,7 +204,7 @@ public class DigitalSignatureService {
     private KeyPair generateKeyPair() {
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keypairGeneratorAlgorithm, BOUNCY_CASTLE_FIPS_PROVIDER);
-            keyPairGenerator.initialize(384, FipsSecureRandom.getInstanceStrong());
+            keyPairGenerator.initialize(384, getSecureRandom());
             return keyPairGenerator.generateKeyPair();
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("Could not generate a key pair for cryptological operations", e);
