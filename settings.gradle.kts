@@ -3,6 +3,9 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.5.0"
+}
 
 dependencyResolutionManagement {
     repositories {
@@ -13,4 +16,6 @@ dependencyResolutionManagement {
 rootProject.name = "simplex-consensus-protocol"
 
 include("simplex-core")
-include("simplex-api")
+include("simplex-messages")
+include("simplex-util")
+include("simplex-model")

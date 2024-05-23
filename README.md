@@ -44,10 +44,20 @@ usability, the library has been implemented in a layered approach.
 
 ## Project Status
 
-Currently, this library is in the pre-alpha stage, where initial development is ongoing.  It is still being developed
-and tested, so it will be some time before the first version is released (even a beta).  If you would like to help, the
-peer-to-peer networking still needs to be figured out.  Development is very active, and there should be commits (nearly)
-daily.  Do not hesitate to reach out if you have comments, questions, requests, or suggestions.
+### Pre-alpha
+
+This project is in the pre-alpha stage.  I am working on completing the initial core protocol implementation, and I
+have not yet started on the peer-to-peer networking layer.  It will, quite likely, be quite some time before this
+library is ready for a release.  If this project interests you, I would be glad to accept assistance.  For people with
+peer-to-peer networking experience, I would be especially grateful for your help. (Hint, hint!)
+
+### Scala reimplementation with Akka
+
+After completing most of the protocol implementation in Java, I was looking for a better way to implement the protocol
+in a way that would be better-suited for peer-to-peer networking.  I decided to switch to the actor model, through Akka,
+and implement everything in scala for its elegance and concise implementation.  I am mostly brand-new to scala, and
+I am definitely brand-new to Akka, so I need to figure out how to enforce various standards and utilize static code
+analysis tools to ensure that the code is of high quality.
 
 ## Layered Approach
 
@@ -58,6 +68,12 @@ daily.  Do not hesitate to reach out if you have comments, questions, requests, 
    deliberate, so that users or teams that have their own peer-to-peer network already present and configured can still
    use the core library with their own network implementation and configuration.
 
+- *Message layer*:
+
+   The message layer is a simple layer that contains the messages that the protocol players (actor system nodes) send
+   to each other.  These can be referred to as "simplex protocol messages".  Note that these messages differ from the
+   various messages that are sent between the actors within a single node.
+
 - *Peer-to-peer network layer*:
 
    The p2p network layer utilizes the Java implementation of libp2p, along with WebRTC, to handle the setup of the
@@ -66,10 +82,9 @@ daily.  Do not hesitate to reach out if you have comments, questions, requests, 
 
 - *Client interaction layer*:
 
-   Since clients of the Simplex Consensus protocol need to submit their transactions to the other peers, and since they
-   need to receive notifications of other peers' transactions, this layer allows the clients to exchange information
-   and utilize the protocol without having any specific knowledge of the protocol operation.  The protocol remains a
-   "black box" to the clients.  This layer is implemented with Spring Boot and provides REST endpoints.
+   Since clients of the Simplex Consensus protocol need to submit their transactions to their local simplex consensus
+   node, and since transactions need to be submitted to the client when an iteration is finalized, this layer provides
+   REST endpoints for these purposes.
 
 ## Simplex Consensus Protocol Description
 

@@ -8,8 +8,6 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":simplex-util"))
-    implementation(project(":simplex-messages"))
     implementation(platform(libs.akka.dependencies.bom))
     implementation(libs.akka.actor.typed)
     implementation(libs.akka.stream)

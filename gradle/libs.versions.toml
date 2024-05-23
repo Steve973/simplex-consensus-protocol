@@ -1,12 +1,16 @@
 [versions]
+akkaBom = "2.9.3"
 bouncycastleFips = "1.0.2.5"
 dependencyLicenseReport = "2.7"
 jackson = "2.17.1"
 kotest = "5.9.0"
 kotlin = "2.0.0"
+logback = "1.5.6"
 lombok = "1.18.32"
 mockk = "1.13.11"
+openfeign = "13.2.1"
 pitest = "1.15.0"
+scala = "3.4.2"
 slf4j = "2.0.13"
 sonarqube = "5.0.0.4638"
 spotbugs = "6.0.14"
@@ -14,6 +18,10 @@ spotbugsAnnotations = "4.8.5"
 spotless = "6.25.0"
 
 [libraries]
+akka-actor-typed = { module = "com.typesafe.akka:akka-actor-typed_3" }
+akka-stream = { module = "com.typesafe.akka:akka-stream_3" }
+akka-slf4j = { module = "com.typesafe.akka:akka-slf4j_3" }
+akka-dependencies-bom = { module = "com.typesafe.akka:akka-bom_3", version.ref = "akkaBom" }
 bouncycastle-provider-fips = { module = "org.bouncycastle:bc-fips", version.ref = "bouncycastleFips" }
 dependency-license-report-plugin = { module = "com.github.jk1.dependency-license-report:com.github.jk1.dependency-license-report.gradle.plugin", version.ref = "dependencyLicenseReport" }
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
@@ -25,9 +33,14 @@ kotest-property = { module = "io.kotest:kotest-property-jvm", version.ref = "kot
 kotest-junit5 = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
 kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+openfeign-core = { module = "io.github.openfeign:feign-core", version.ref = "openfeign" }
+openfeign-jackson = { module = "io.github.openfeign:feign-jackson", version.ref = "openfeign" }
+openfeign-okhttp = { module = "io.github.openfeign:feign-okhttp", version.ref = "openfeign" }
 pitest-plugin = { module = "info.solidsoft.gradle.pitest:gradle-pitest-plugin", version.ref = "pitest" }
+scala-library = { module = "org.scala-lang:scala3-library_3", version.ref = "scala" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 sonarqube-plugin = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin", version.ref = "sonarqube" }
@@ -37,6 +50,7 @@ spotless-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", ver
 
 [bundles]
 kotest = ["kotest-junit5", "kotest-framework", "kotest-assertions", "kotest-property", "mockk"]
+openfeign = ["openfeign-core", "openfeign-jackson", "openfeign-okhttp"]
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
