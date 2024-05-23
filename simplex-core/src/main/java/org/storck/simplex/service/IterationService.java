@@ -13,11 +13,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -75,10 +77,16 @@ public class IterationService {
     private ScheduledExecutorService scheduledExecutorService;
 
     /**
-     * The timer task that is responsible for ending the iteration when the allotted
-     * duration elapses.
+     * The {@link FutureTask} that is responsible for ending the iteration
+     * when the allotted duration elapses.
      */
-    private TimerTask timerTask;
+    private FutureTask<Void> futureTask;
+
+    /**
+     * The scheduled task to end the iteration if the duration elapses without
+     * completion.
+     */
+    private ScheduledFuture<?> iterationTimer;
 
     /**
      * Create a service instance that will need to be further initialized by calling
@@ -118,21 +126,18 @@ public class IterationService {
         this.leaderId = electLeader(iterationNumber);
         this.countDownLatch = countDownLatch;
         this.scheduledExecutorService = Executors.newScheduledThreadPool(1);
-        this.timerTask = new TimerTask() {
-
-            @Override
-            public void run() {
-                try {
-                    Vote vote = new Vote(localPlayerId, iterationNumber, "");
-                    byte[] voteBytes = MessageUtils.toBytes(vote);
-                    byte[] voteSignature = digitalSignatureService.generateSignature(voteBytes);
-                    VoteSigned signedVote = new VoteSigned(vote, voteSignature);
-                    peerNetworkClient.broadcastVote(new VoteProtocolMessage(MessageUtils.toBytes(signedVote)));
-                } finally {
-                    countDownLatch.countDown();
-                }
+        this.futureTask = new FutureTask<>(() -> {
+            try {
+                Vote vote = new Vote(localPlayerId, iterationNumber, "");
+                byte[] voteBytes = MessageUtils.toBytes(vote);
+                byte[] voteSignature = digitalSignatureService.generateSignature(voteBytes);
+                VoteSigned signedVote = new VoteSigned(vote, voteSignature);
+                peerNetworkClient.broadcastVote(new VoteProtocolMessage(MessageUtils.toBytes(signedVote)));
+            } finally {
+                countDownLatch.countDown();
             }
-        };
+            return null;
+        });
     }
 
     /**
@@ -154,7 +159,8 @@ public class IterationService {
      * times out.
      */
     public void startIteration() {
-        this.scheduledExecutorService.schedule(this.timerTask, 3L * peerNetworkClient.getNetworkDeltaSeconds(), TimeUnit.SECONDS);
+        this.iterationTimer = this.scheduledExecutorService.schedule(
+                futureTask, 3L * peerNetworkClient.getNetworkDeltaSeconds(), TimeUnit.SECONDS);
     }
 
     /**
@@ -183,7 +189,7 @@ public class IterationService {
      * iteration immediately.
      */
     public void stopIteration() {
-        scheduledExecutorService.shutdownNow();
+        iterationTimer.cancel(false);
         this.countDownLatch.countDown();
     }
 
@@ -197,11 +203,13 @@ public class IterationService {
     }
 
     /**
-     * If the timer is shut down, this returns true, or false otherwise.
+     * If the timer is cancelled or done, this returns true, or false otherwise.
      *
-     * @return true if the timer is shut down, or false otherwise
+     * @return true if the timer is cancelled or done, or false otherwise
      */
     public boolean isShutdown() {
-        return scheduledExecutorService.isShutdown();
+        return Optional.ofNullable(iterationTimer)
+                .map(it -> it.isCancelled() || it.isDone())
+                .orElse(false);
     }
 }
