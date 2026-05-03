@@ -10,7 +10,7 @@ pitest = "1.15.0"
 slf4j = "2.0.13"
 sonarqube = "5.0.0.4638"
 spotbugs = "6.0.14"
-spotbugsAnnotations = "4.8.5"
+spotbugsAnnotations = "4.8.6"
 spotless = "6.25.0"
 
 [libraries]
