@@ -1,7 +1,7 @@
 [versions]
-bouncycastleFips = "1.0.2.5"
+bouncycastleFips = "1.0.2.6"
 dependencyLicenseReport = "2.7"
-jackson = "2.17.1"
+jackson = "2.21.3"
 kotest = "5.9.1"
 kotlin = "2.0.0"
 lombok = "1.18.32"
