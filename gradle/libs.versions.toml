@@ -1,16 +1,16 @@
 [versions]
 bouncycastleFips = "2.0.0"
 dependencyLicenseReport = "2.7"
-jackson = "2.17.1"
+jackson = "2.21.3"
 kotest = "5.9.1"
 kotlin = "2.0.0"
-lombok = "1.18.32"
-mockk = "1.13.11"
+lombok = "1.18.34"
+mockk = "1.13.12"
 pitest = "1.15.0"
 slf4j = "2.0.13"
 sonarqube = "5.0.0.4638"
 spotbugs = "6.0.14"
-spotbugsAnnotations = "4.8.5"
+spotbugsAnnotations = "4.8.6"
 spotless = "6.25.0"
 
 [libraries]
