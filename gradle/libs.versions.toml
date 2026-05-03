@@ -1,5 +1,5 @@
 [versions]
-bouncycastleFips = "2.0.0"
+bouncycastleFips = "2.0.1"
 dependencyLicenseReport = "2.7"
 jackson = "2.21.3"
 kotest = "5.9.1"
